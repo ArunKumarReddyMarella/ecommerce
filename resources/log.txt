@@ -1,0 +1,15 @@
+c2d766ca982eca8304150849735ffef9
+2016-03-25 22:59:23 +0000
+http://www.flipkart.com/alisha-solid-women-s-cycling-shorts/p/itmeh2ffvzetthbb?pid=SRTEH2FF9KEDEFGF
+Alisha Solid Women's Cycling Shorts
+["Clothing , Women's Clothing , Lingerie, Sleep & Swimwear , Shorts , Alisha Shorts , Alisha Solid Women's Cycling Shorts"]
+SRTEH2FF9KEDEFGF
+999.0
+379.0
+["http://img5a.flixcart.com/image/short/u/4/a/altht-3p-21-alisha-38-original-imaeh2d5vm5zbtgg.jpeg", "http://img5a.flixcart.com/image/short/p/j/z/altght4p-26-alisha-38-original-imaeh2d5kbufss6n.jpeg", "http://img5a.flixcart.com/image/short/p/j/z/altght4p-26-alisha-38-original-imaeh2d5npdybzyt.jpeg", "http://img5a.flixcart.com/image/short/z/j/7/altght-7-alisha-38-original-imaeh2d5jsz2ghd6.jpeg"]
+False
+Key Features of Alisha Solid Women's Cycling Shorts Cotton Lycra Navy, Red, Navy,Specifications of Alisha Solid Women's Cycling Shorts Shorts Details Number of Contents in Sales Package Pack of 3 Fabric Cotton Lycra Type Cycling Shorts General Details Pattern Solid Ideal For Women's Fabric Care Gentle Machine Wash in Lukewarm Water, Do Not Bleach Additional Details Style Code ALTHT_3P_21 In the Box 3 shorts
+No rating available
+No rating available
+Alisha
+{"product_specification":[{"key":"Number of Contents in Sales Package", "value":"Pack of 3"}, {"key":"Fabric", "value":"Cotton Lycra"}, {"key":"Type", "value":"Cycling Shorts"}, {"key":"Pattern", "value":"Solid"}, {"key":"Ideal For", "value":"Women's"}, {"value":"Gentle Machine Wash in Lukewarm Water, Do Not Bleach"}, {"key":"Style Code", "value":"ALTHT_3P_21"}, {"value":"3 shorts"}]}
