@@ -14,12 +14,10 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "products")
+@Table(name = "product")
 public class Product {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int productId;
-    private String uniqId;
+    private String productId;
     private Timestamp crawlTimestamp;
     @Column(length = 65535)
     private String productUrl;
