@@ -12,8 +12,12 @@ import java.util.Map;
 @RestController
 @RequestMapping("/product")
 public class ProductController {
-    @Autowired
-    private ProductService productService;
+
+    private final ProductService productService;
+
+    public ProductController(ProductService productService) {
+        this.productService = productService;
+    }
 
     @GetMapping
     public ResponseEntity<List<Product>> getProducts(){
@@ -21,13 +25,8 @@ public class ProductController {
         return ResponseEntity.ok(products);
     }
 
-    @GetMapping("maxId")
-    public ResponseEntity<Integer> getMaxId(){
-        return ResponseEntity.ok(productService.getMaxId());
-    }
-
     @GetMapping("{id}")
-    public ResponseEntity<Product> getProduct(@PathVariable int id){
+    public ResponseEntity<Product> getProduct(@PathVariable String id){
         Product product = productService.getProductById(id);
         return ResponseEntity.ok(product);
     }
@@ -49,7 +48,7 @@ public class ProductController {
     }
 
     @PatchMapping("/{productId}")
-    public ResponseEntity<Product> patchProduct(@PathVariable int productId, @RequestBody Map<String, Object> updates) {
+    public ResponseEntity<Product> patchProduct(@PathVariable String productId, @RequestBody Map<String, Object> updates) {
         Product existingProduct = productService.getProductById(productId);
         if (existingProduct == null) {
             return ResponseEntity.notFound().build();
@@ -60,8 +59,8 @@ public class ProductController {
     }
 
     @DeleteMapping("{id}")
-    public ResponseEntity<String> deleteProduct(@PathVariable int id){
-        Product deletedProduct = productService.deleteProduct(id);
+    public ResponseEntity<String> deleteProduct(@PathVariable String id){
+        productService.deleteProduct(id);
         return ResponseEntity.ok("Todo deleted successfully!.");
     }
 

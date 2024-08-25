@@ -10,11 +10,10 @@ import java.util.Optional;
 @Service
 public interface ProductService {
     public List<Product> getProducts();
-    public Product getProductById(int Id);
+    public Product getProductById(String Id);
     public Product createProduct(Product product);
-    public int getMaxId(); //call lo vuna
-    public Product deleteProduct(int Id);
+    public void deleteProduct(String Id);
 
     public Product updateProduct(Product updatedProduct);
-    public void patchProduct(int productId, Map<String, Object> updates);
+    public void patchProduct(String productId, Map<String, Object> updates);
 }

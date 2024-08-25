@@ -25,7 +25,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product getProductById(int Id) {
+    public Product getProductById(String Id) {
         Optional<Product> optionalProduct = productRepository.findById(Id);
         return optionalProduct.orElse(null);
     }
@@ -35,15 +35,10 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.saveAndFlush(product);
     }
 
-    @Override
-    public int getMaxId() {
-        return productRepository.findMaxProductId();
-    }
 
     @Override
-    public Product deleteProduct(int Id) {
-        Product product = productRepository.deleteById(Id);
-        return product;
+    public void deleteProduct(String Id) {
+        productRepository.deleteById(Id);
     }
 
     @Override
@@ -53,7 +48,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void patchProduct(int productId, Map<String, Object> updates) {
+    public void patchProduct(String productId, Map<String, Object> updates) {
         Product existingProduct = productRepository.findById(productId).orElseThrow(() -> new RuntimeException("Product not found"));
 
         updates.forEach((key, value) -> {
