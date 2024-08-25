@@ -2,6 +2,7 @@ import pandas as pd
 import mysql.connector
 from mysql.connector import Error
 from datetime import datetime
+import uuid
 
 def connect_to_database(host, database, user, password):
     """Establish a connection to the MySQL database."""
@@ -33,17 +34,14 @@ def insert_data_to_database(connection, data):
     """Insert data into the MySQL country table."""
     cursor = connection.cursor()
     insert_query = """
-        INSERT INTO country (country_id, country, last_update)
+        INSERT INTO country (country_uuid, country, last_update)
         VALUES (%s, %s, %s)
-        ON DUPLICATE KEY UPDATE country=%s, last_update=%s
     """
     for _, row in data.iterrows():
         record = (
-            row['country_id'], 
+            row['country_uuid'],  
             row['country'], 
             datetime.now(), 
-            row['country'], 
-            datetime.now()
         )
         cursor.execute(insert_query, record)
     

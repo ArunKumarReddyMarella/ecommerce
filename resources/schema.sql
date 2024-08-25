@@ -17,7 +17,8 @@ CREATE TABLE user (
     username VARCHAR(50) NOT NULL,
     email VARCHAR(255) NOT NULL,
     address_id varchar(50),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Drop Addresses Table if it exists
@@ -25,11 +26,11 @@ DROP TABLE IF EXISTS address;
 
 -- Create Addresses Table
 CREATE TABLE address (
-    address_id varchar(50) PRIMARY KEY,
+	address_uuid varchar(50) primary key,
     primary_address varchar(50),
     secondary_address varchar(50),
     district varchar(20),
-    city_id smallint unique,
+    city_id varchar(50),
     postal_code varchar(10),
     phone varchar(20),
     location geometry,
@@ -41,9 +42,9 @@ DROP TABLE IF EXISTS city;
 
 -- Create city Table
 CREATE table city (
-	city_id smallint primary key,
+	city_uuid VARCHAR(50) PRIMARY KEY,
     city varchar(50),
-    country_id smallint unique,
+    country_id varchar(50),
     last_update timestamp
 );
 
@@ -52,7 +53,7 @@ DROP TABLE IF EXISTS country;
 
 -- Create country Table
 create table country(
-	country_id smallint primary key,
+	country_uuid VARCHAR(50) PRIMARY KEY,
     country varchar(50),
     last_update timestamp
 );

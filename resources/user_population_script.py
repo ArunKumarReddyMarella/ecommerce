@@ -30,24 +30,37 @@ def load_csv_data(file_path):
         print(f"Error loading CSV: {e}")
         return None
 
+def get_address_uuid(connection, address_id):
+    """Fetches the country_uuid from the country table based on country_id."""
+    cursor = connection.cursor()
+    query = "SELECT address_uuid FROM address WHERE address_id = %s"
+    cursor.execute(query, (address_id,))
+    result = cursor.fetchone()
+    print(address_id)
+    print(result)
+    cursor.close()
+    return result[0] if result else None
+
 def insert_data_to_database(connection, data):
     """Insert data into the MySQL country table."""
     cursor = connection.cursor()
     insert_query = """
-        INSERT INTO city (city_uuid,city,country_id,last_update)
-        VALUES (%s, %s, %s, %s)
+        INSERT INTO user (user_id,first_name,last_name,username,email,address_id,created_at,last_update)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+
     """
-    
     for _, row in data.iterrows():
         record = (
-            row['city_uuid'], 
-            row['city'], 
-            row['country_id'], 
-            datetime.now(),
+            row['user_id'], 
+            row['first_name'], 
+            row['last_name'],
+            row['username'],
+            row['email'],
+            row['address_id'],
+            row['created_at'],
+            row['last_update'],
         )
-        print(record)
         cursor.execute(insert_query, record)
-        print("query executed")
     
     connection.commit()
     cursor.close()
@@ -65,7 +78,7 @@ def main():
     
     if connection:
         # Load data from CSV
-        data = load_csv_data('city_data.csv')
+        data = load_csv_data('user_data.csv')
         
         if data is not None:
             # Insert data into database
