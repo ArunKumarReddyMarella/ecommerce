@@ -6,45 +6,64 @@ CREATE SCHEMA IF NOT EXISTS ecommerce;
 USE ecommerce;
 
 -- Drop Users Table if it exists
-DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS user;
 
 -- Create Users Table
-CREATE TABLE users (
-    user_id INT PRIMARY KEY AUTO_INCREMENT,
+CREATE TABLE user (
+    user_id varchar(50) PRIMARY KEY,
     first_name VARCHAR(50) NOT NULL,
     middle_name VARCHAR(50),
     last_name VARCHAR(50) NOT NULL,
     username VARCHAR(50) NOT NULL,
     email VARCHAR(255) NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    role VARCHAR(20) DEFAULT 'USER',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    address_id varchar(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Drop Addresses Table if it exists
-DROP TABLE IF EXISTS addresses;
+DROP TABLE IF EXISTS address;
 
 -- Create Addresses Table
-CREATE TABLE addresses (
-    address_id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT,
-    street VARCHAR(255) NOT NULL,
-    city VARCHAR(50) NOT NULL,
-    state VARCHAR(50) NOT NULL,
-    zip_code VARCHAR(20) NOT NULL,
-    country VARCHAR(50) NOT NULL,
-    longitude DECIMAL(9,6),
-    latitude DECIMAL(8,6),
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
+CREATE TABLE address (
+	address_uuid varchar(50) primary key,
+    primary_address varchar(50),
+    secondary_address varchar(50),
+    district varchar(20),
+    city_id varchar(50),
+    postal_code varchar(10),
+    phone varchar(20),
+    location geometry,
+    last_update timestamp
+);
+
+-- Drop city Table if it exists
+DROP TABLE IF EXISTS city;
+
+-- Create city Table
+CREATE table city (
+	city_uuid VARCHAR(50) PRIMARY KEY,
+    city varchar(50),
+    country_id varchar(50),
+    last_update timestamp
+);
+
+-- Drop country Table if it exists
+DROP TABLE IF EXISTS country;
+
+-- Create country Table
+create table country(
+	country_uuid VARCHAR(50) PRIMARY KEY,
+    country varchar(50),
+    last_update timestamp
 );
 
 -- Drop Products Table if it exists
-DROP TABLE IF EXISTS products;
+DROP TABLE IF EXISTS product;
 
 -- Create Products Table
-CREATE TABLE products (
-    product_id INT PRIMARY KEY AUTO_INCREMENT,
-    uniq_id VARCHAR(255),
+CREATE TABLE product (
+    product_id VARCHAR(255) primary key,
     crawl_timestamp TIMESTAMP,
     product_url TEXT,
     product_name TEXT NOT NULL,
@@ -55,12 +74,12 @@ CREATE TABLE products (
     image_urls JSON, -- Array of image URLs
     is_FK_Advantage_product BOOLEAN,
     product_description TEXT,
-    product_rating varchar(255),
-    overall_rating varchar(255),
-    brand VARCHAR(100),
+    product_rating varchar(2550),
+    overall_rating varchar(2550),
+    brand VARCHAR(1000),
     product_specifications TEXT,
     stock_quantity INT NOT NULL,
-    quantity_unit VARCHAR(100),
+    quantity_unit VARCHAR(1000),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -69,13 +88,11 @@ DROP TABLE IF EXISTS cart;
 
 -- Create Cart Table
 CREATE TABLE cart (
-    cart_id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT,
-    product_id INT,
+    cart_id varchar(50) PRIMARY KEY,
+    user_id varchar(50),
+    product_id varchar(50),
     quantity INT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(user_id),
-    FOREIGN KEY (product_id) REFERENCES products(product_id)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Drop Wishlist Table if it exists
@@ -83,12 +100,12 @@ DROP TABLE IF EXISTS wishlist;
 
 -- Create Wishlist Table
 CREATE TABLE wishlist (
-    wishlist_id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT,
-    product_id INT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(user_id),
-    FOREIGN KEY (product_id) REFERENCES products(product_id)
+    wishlist_id varchar(50) PRIMARY KEY,
+    user_id varchar(50),
+    product_id varchar(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+--     FOREIGN KEY (user_id) REFERENCES users(user_id),
+--     FOREIGN KEY (product_id) REFERENCES products(product_id)
 );
 
 -- Drop Orders Table if it exists
@@ -96,12 +113,12 @@ DROP TABLE IF EXISTS orders;
 
 -- Create Orders Table
 CREATE TABLE orders (
-    order_id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT,
+    order_id varchar(50) PRIMARY KEY,
+    user_id varchar(50),
     order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     total_amount DECIMAL(10, 2) NOT NULL,
-    status VARCHAR(20) DEFAULT 'Pending',
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
+    status VARCHAR(20) DEFAULT 'Pending'
+ --    FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
 -- Drop Order Items Table if it exists
@@ -109,13 +126,13 @@ DROP TABLE IF EXISTS order_items;
 
 -- Create Order Items Table
 CREATE TABLE order_items (
-    order_item_id INT PRIMARY KEY AUTO_INCREMENT,
-    order_id INT,
-    product_id INT,
+    order_item_id varchar(50) PRIMARY KEY,
+    order_id varchar(50),
+    product_id varchar(50),
     quantity INT NOT NULL,
-    price DECIMAL(10, 2) NOT NULL,
-    FOREIGN KEY (order_id) REFERENCES orders(order_id),
-    FOREIGN KEY (product_id) REFERENCES products(product_id)
+    price DECIMAL(10, 2) NOT NULL
+--     FOREIGN KEY (order_id) REFERENCES orders(order_id),
+--     FOREIGN KEY (product_id) REFERENCES products(product_id)
 );
 
 -- Drop Ratings Table if it exists
@@ -123,14 +140,14 @@ DROP TABLE IF EXISTS ratings;
 
 -- Create Ratings Table
 CREATE TABLE ratings (
-    rating_id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT,
-    product_id INT,
+    rating_id varchar(50) PRIMARY KEY,
+    user_id varchar(50),
+    product_id varchar(50),
     rating INT NOT NULL,
     review TEXT, -- Text format for review
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(user_id),
-    FOREIGN KEY (product_id) REFERENCES products(product_id)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+--     FOREIGN KEY (user_id) REFERENCES users(user_id),
+--     FOREIGN KEY (product_id) REFERENCES products(product_id)
 );
 
 -- Drop Rating Images Table if it exists
@@ -138,13 +155,13 @@ DROP TABLE IF EXISTS rating_images;
 
 -- Create Rating Images Table
 CREATE TABLE rating_images (
-    image_id INT PRIMARY KEY AUTO_INCREMENT,
-    rating_id INT,
+    image_id varchar(50) PRIMARY KEY,
+    rating_id varchar(50),
     image LONGBLOB, -- Direct image data
     meta_data1 VARCHAR(255),
     meta_data2 VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (rating_id) REFERENCES ratings(rating_id) ON DELETE CASCADE
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  --   FOREIGN KEY (rating_id) REFERENCES ratings(rating_id) ON DELETE CASCADE
 );
 
 -- Drop Cards Table if it exists
@@ -152,15 +169,15 @@ DROP TABLE IF EXISTS cards;
 
 -- Create Cards Table
 CREATE TABLE cards (
-    card_id INT PRIMARY KEY AUTO_INCREMENT,
+    card_id varchar(50) PRIMARY KEY,
     card_number VARCHAR(16) NOT NULL,
     card_holder_name VARCHAR(255) NOT NULL,
     card_type VARCHAR(50) NOT NULL,
     expiration_date DATE NOT NULL,
     cvv INT NOT NULL,
-    user_id INT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
+    user_id varchar(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  --   FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
 -- Drop Transactions Table if it exists
@@ -168,13 +185,13 @@ DROP TABLE IF EXISTS transactions;
 
 -- Create Transactions Table
 CREATE TABLE transactions (
-    transaction_id INT PRIMARY KEY AUTO_INCREMENT,
-    order_id INT,
-    card_id INT,
+    transaction_id varchar(50) PRIMARY KEY,
+    order_id varchar(50),
+    card_id varchar(50),
     amount DECIMAL(10, 2) NOT NULL,
-    transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (order_id) REFERENCES orders(order_id),
-    FOREIGN KEY (card_id) REFERENCES cards(card_id)
+    transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+--     FOREIGN KEY (order_id) REFERENCES orders(order_id),
+--     FOREIGN KEY (card_id) REFERENCES cards(card_id)
 );
 
 -- Drop Invoices Table if it exists
@@ -182,9 +199,9 @@ DROP TABLE IF EXISTS invoices;
 
 -- Create Invoices Table
 CREATE TABLE invoices (
-    invoice_id INT PRIMARY KEY AUTO_INCREMENT,
-    transaction_id INT,
+    invoice_id varchar(50) PRIMARY KEY,
+    transaction_id varchar(50),
     payment_amount DECIMAL(10, 2) NOT NULL,
-    payment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (transaction_id) REFERENCES transactions(transaction_id)
+    payment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  --   FOREIGN KEY (transaction_id) REFERENCES transactions(transaction_id)
 );
