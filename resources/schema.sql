@@ -136,10 +136,10 @@ CREATE TABLE order_items (
 );
 
 -- Drop Ratings Table if it exists
-DROP TABLE IF EXISTS ratings;
+DROP TABLE IF EXISTS rating;
 
 -- Create Ratings Table
-CREATE TABLE ratings (
+CREATE TABLE rating (
     rating_id varchar(50) PRIMARY KEY,
     user_id varchar(50),
     product_id varchar(50),
@@ -165,12 +165,12 @@ CREATE TABLE rating_images (
 );
 
 -- Drop Cards Table if it exists
-DROP TABLE IF EXISTS cards;
+DROP TABLE IF EXISTS card;
 
 -- Create Cards Table
-CREATE TABLE cards (
+CREATE TABLE card (
     card_id varchar(50) PRIMARY KEY,
-    card_number VARCHAR(16) NOT NULL,
+    card_number VARCHAR(50) NOT NULL,
     card_holder_name VARCHAR(255) NOT NULL,
     card_type VARCHAR(50) NOT NULL,
     expiration_date DATE NOT NULL,
