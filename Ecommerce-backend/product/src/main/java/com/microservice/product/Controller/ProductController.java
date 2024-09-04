@@ -2,14 +2,17 @@ package com.microservice.product.Controller;
 
 import com.microservice.product.Entity.Product;
 import com.microservice.product.Service.ProductService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/product")
+@RequestMapping("/products")
 public class ProductController {
 
     private final ProductService productService;
@@ -18,15 +21,29 @@ public class ProductController {
         this.productService = productService;
     }
 
-    @GetMapping
-    public ResponseEntity<List<Product>> getProducts(){
-        List<Product> products = productService.getProducts();
-        return ResponseEntity.ok(products);
+//
+@GetMapping
+public ResponseEntity<Page<Product>> getProducts(
+        @RequestParam(defaultValue = "0") int page,  // Default to page 0
+        @RequestParam(defaultValue = "10") int size, // Default to 10 items per page
+        @RequestParam(defaultValue = "desc") String sortDirection) {
+
+    Sort sort = Sort.by(sortDirection.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, "retailPrice"); // Example: sorting by productName
+    Pageable pageable = PageRequest.of(page, size, sort);
+
+    Page<Product> products = productService.getProducts(pageable);
+    return ResponseEntity.ok(products);
+}
+
+    @GetMapping("id/{id}")
+    public ResponseEntity<Product> getProductById(@PathVariable String id){
+        Product product = productService.getProductById(id);
+        return ResponseEntity.ok(product);
     }
 
-    @GetMapping("{id}")
-    public ResponseEntity<Product> getProduct(@PathVariable String id){
-        Product product = productService.getProductById(id);
+    @GetMapping("productName/{productName}")
+    public ResponseEntity<Product> getProductByName(@PathVariable String productName){
+        Product product = productService.getProductByProductName(productName);
         return ResponseEntity.ok(product);
     }
 
@@ -37,7 +54,7 @@ public class ProductController {
     }
 
     @PutMapping("/{productId}")
-    public ResponseEntity<Product> updateProduct(@PathVariable int productId, @RequestBody Product product) {
+    public ResponseEntity<Product> updateProduct(@PathVariable String productId, @RequestBody Product product) {
 //        product.setProductId(productId); // Ensure ID matches path variable
         Product updatedProduct = productService.updateProduct(product);
         if (updatedProduct == null) {
@@ -60,7 +77,7 @@ public class ProductController {
     @DeleteMapping("{id}")
     public ResponseEntity<String> deleteProduct(@PathVariable String id){
         productService.deleteProduct(id);
-        return ResponseEntity.ok("Todo deleted successfully!.");
+        return ResponseEntity.ok("product deleted successfully!.");
     }
 
 }

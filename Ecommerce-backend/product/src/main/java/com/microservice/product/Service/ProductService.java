@@ -1,16 +1,17 @@
 package com.microservice.product.Service;
 
 import com.microservice.product.Entity.Product;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 public interface ProductService {
-    public List<Product> getProducts();
+    public Page<Product> getProducts(Pageable pageable);
     public Product getProductById(String Id);
+    public Product getProductByProductName(String productName);
     public Product createProduct(Product product);
     public void deleteProduct(String Id);
 

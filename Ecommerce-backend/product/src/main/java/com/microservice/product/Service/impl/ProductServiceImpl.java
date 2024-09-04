@@ -5,10 +5,11 @@ import com.microservice.product.Repository.ProductRepository;
 import com.microservice.product.Service.ProductService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -20,8 +21,8 @@ public class ProductServiceImpl implements ProductService {
     private ProductRepository productRepository;
 
     @Override
-    public List<Product> getProducts() {
-        return productRepository.findAll();
+    public Page<Product> getProducts(Pageable pageable) {
+        return productRepository.findAll(pageable);
     }
 
     @Override
@@ -31,7 +32,20 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public Product getProductByProductName(String productName){
+        Optional<Product> optionalProduct = productRepository.findByProductName(productName);
+//        return optionalProduct.orElse(null);
+        if(optionalProduct.isEmpty())
+            return null;
+        return optionalProduct.get();
+    }
+
+    @Override
     public Product createProduct(Product product) {
+        Optional<Product> existingProduct = productRepository.findById(product.getProductId());
+        if (existingProduct.isPresent()) {
+            throw new RuntimeException("Product with ID " + product.getProductId() + " already exists.");
+        }
         return productRepository.saveAndFlush(product);
     }
 
