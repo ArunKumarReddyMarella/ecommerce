@@ -1,0 +1,12 @@
+Challenges:
+	resolved:
+		1)problem:
+			passing string argument with spaces "Breitling AB011010/BB08 131S Chronomat 44 Analog Watch  - For Boys, Men" not accepting by @pathvariable
+		solution: changed to @RequestParam("paramName") String param.
+		2)problem:
+			patch mapping using reflections for updating, but overall value is saving in string format for other datatypes like timestamp
+		solution: checking datatypes of each field and converted the value respectively
+
+	existing:
+		
+	
