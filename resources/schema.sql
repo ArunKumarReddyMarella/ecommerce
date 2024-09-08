@@ -16,7 +16,7 @@ CREATE TABLE user (
     last_name VARCHAR(50) NOT NULL,
     username VARCHAR(50) NOT NULL,
     email VARCHAR(255) NOT NULL,
-    address_id varchar(50),
+    address_id varchar(1000),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

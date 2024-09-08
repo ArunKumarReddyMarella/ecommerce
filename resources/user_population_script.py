@@ -56,7 +56,7 @@ def insert_data_to_database(connection, data):
             row['last_name'],
             row['username'],
             row['email'],
-            row['address_id'],
+            row['address_id']+",",
             row['created_at'],
             row['last_update'],
         )

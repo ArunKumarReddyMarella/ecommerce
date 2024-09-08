@@ -8,5 +8,7 @@ Challenges:
 		solution: checking datatypes of each field and converted the value respectively
 
 	existing:
+		1)problem:
+			validating columns for null, empty string values, numbers using jakarta
 		
 	
