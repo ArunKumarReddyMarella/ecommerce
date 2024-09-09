@@ -29,9 +29,9 @@ CREATE TABLE address (
 	address_uuid varchar(50) primary key,
     primary_address varchar(50) NOT NULL,
     secondary_address varchar(50),
-    district varchar(20) NOT NULL,
+    district varchar(20),
     city_id varchar(50) NOT NULL,
-    postal_code varchar(10) NOT NULL,
+    postal_code varchar(10),
     phone varchar(20),
     location geometry,
     last_update timestamp

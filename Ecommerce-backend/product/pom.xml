@@ -3,11 +3,10 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>com.example</groupId>
+		<groupId>com.ecommerce</groupId>
 		<artifactId>Ecommerce-backend</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<groupId>com.ecommerce</groupId>
 	<artifactId>product</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>product</name>

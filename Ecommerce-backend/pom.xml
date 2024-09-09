@@ -8,7 +8,7 @@
 		<version>3.3.3</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.example</groupId>
+	<groupId>com.ecommerce</groupId>
 	<artifactId>Ecommerce-backend</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
@@ -25,6 +25,13 @@
 		<module>product</module>
 		<module>user</module>
 		<module>cart</module>
+		<module>wishlist</module>
+		<module>card</module>
+		<module>order</module>
+		<module>order-items</module>
+		<module>transaction</module>
+		<module>invoice</module>
+		<module>rating</module>
 	</modules>
 	<scm>
 		<connection/>
