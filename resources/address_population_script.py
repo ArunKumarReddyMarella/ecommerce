@@ -54,7 +54,7 @@ def insert_data_to_database(connection, data):
 
     insert_query = """
         INSERT INTO address (
-            address_uuid,
+            address_id,
             primary_address, 
             secondary_address, 
             district, 

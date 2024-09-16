@@ -34,7 +34,7 @@ def insert_data_to_database(connection, data):
     """Insert data into the MySQL country table."""
     cursor = connection.cursor()
     insert_query = """
-        INSERT INTO country (country_uuid, country, last_update)
+        INSERT INTO country (country_id, country, last_update)
         VALUES (%s, %s, %s)
     """
     for _, row in data.iterrows():

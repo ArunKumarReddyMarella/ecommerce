@@ -1,0 +1,34 @@
+type Address {
+    addressId: ID!
+    address: String
+    address2: String
+    district: String
+    postalCode: String
+    phone: String
+    lastUpdate: String
+    city: City
+}
+
+type City {
+    cityId: ID!
+    city: String
+    lastUpdate: String
+    country: Country
+    addresses: [Address]
+}
+
+type Country {
+    countryId: ID!
+    country: String
+    lastUpdate: String
+    cities: [City]
+}
+
+type Query {
+    allAddresses: [Address]
+    addressById(id: ID!): Address
+    allCities: [City]
+    cityById(id: ID!): City
+    allCountries: [Country]
+    countryById(id: ID!): Country
+}

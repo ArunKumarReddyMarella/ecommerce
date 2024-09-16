@@ -32,6 +32,7 @@
 		<module>transaction</module>
 		<module>invoice</module>
 		<module>rating</module>
+		<module>address</module>
 	</modules>
 	<scm>
 		<connection/>
