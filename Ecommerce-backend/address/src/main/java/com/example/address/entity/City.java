@@ -3,16 +3,16 @@ package com.example.address.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
 import java.util.List;
 
 @Entity
-@Data
+@Getter
+@Setter
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -26,6 +26,8 @@ public class City {
     @Column(name = "city")
     private String city;
 
+    @Column(name = "last_update")
+    @UpdateTimestamp
     private Timestamp lastUpdate;
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST) // Persist the country when saving a city
@@ -33,6 +35,7 @@ public class City {
     private Country country;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "city", cascade = CascadeType.ALL) // Cascade all operations to addresses
+    @OneToMany(mappedBy = "city", cascade = CascadeType.ALL)
+    @ToString.Exclude // Cascade all operations to addresses
     private List<Address> addresses;
 }

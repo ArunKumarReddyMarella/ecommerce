@@ -26,7 +26,7 @@ DROP TABLE IF EXISTS address;
 
 -- Create Addresses Table
 CREATE TABLE address (
-	address_uuid varchar(50) primary key,
+	address_id varchar(50) primary key,
     primary_address varchar(50) NOT NULL,
     secondary_address varchar(50),
     district varchar(20),
@@ -42,7 +42,7 @@ DROP TABLE IF EXISTS city;
 
 -- Create city Table
 CREATE table city (
-	city_uuid VARCHAR(50) PRIMARY KEY,
+	city_id VARCHAR(50) PRIMARY KEY,
     city varchar(50) NOT NULL,
     country_id varchar(50) NOT NULL,
     last_update timestamp
@@ -53,7 +53,7 @@ DROP TABLE IF EXISTS country;
 
 -- Create country Table
 create table country(
-	country_uuid VARCHAR(50) PRIMARY KEY,
+	country_id VARCHAR(50) PRIMARY KEY,
     country varchar(50) NOT NULL,
     last_update timestamp
 );
