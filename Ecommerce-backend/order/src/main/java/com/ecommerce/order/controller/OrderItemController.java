@@ -1,7 +1,7 @@
-package com.ecommerce.order_items.controller;
+package com.ecommerce.order.controller;
 
-import com.ecommerce.order_items.entity.OrderItem;
-import com.ecommerce.order_items.service.OrderItemService;
+import com.ecommerce.order.entity.OrderItem;
+import com.ecommerce.order.service.OrderItemService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

@@ -15,7 +15,13 @@
 		<java.version>17</java.version>
 	</properties>
 	<dependencies>
-	</dependencies>
+        <dependency>
+            <groupId>com.ecommerce</groupId>
+            <artifactId>order</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
 
 	<build>
 		<plugins>

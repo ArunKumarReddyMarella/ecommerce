@@ -1,6 +1,7 @@
 package com.ecommerce.order.service;
 
 import com.ecommerce.order.entity.Order;
+import com.ecommerce.order.entity.OrderItem;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -13,4 +14,7 @@ public interface OrderService {
     Order updateOrder(Order updatedOrder);
     void patchOrder(String orderId, Map<String, Object> updates);
     void deleteOrder(String id);
+
+
+    Page<OrderItem> getOrderItemsByUserId(String userId, Pageable pageable);
 }

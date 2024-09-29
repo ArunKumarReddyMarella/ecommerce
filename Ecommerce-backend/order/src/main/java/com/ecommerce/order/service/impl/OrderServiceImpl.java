@@ -1,7 +1,9 @@
 package com.ecommerce.order.service.impl;
 
 import com.ecommerce.order.entity.Order;
+import com.ecommerce.order.entity.OrderItem;
 import com.ecommerce.order.repository.OrderRepository;
+import com.ecommerce.order.service.OrderItemService;
 import com.ecommerce.order.service.OrderService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,7 @@ import java.lang.reflect.Field;
 import java.sql.Timestamp;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -23,6 +26,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private OrderRepository orderRepository;
+
+    @Autowired
+    private OrderItemService orderItemService;
 
     @Override
     public Page<Order> getOrders(Pageable pageable) {
@@ -81,5 +87,11 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void deleteOrder(String id) {
         orderRepository.deleteById(id);
+    }
+
+    @Override
+    public Page<OrderItem> getOrderItemsByUserId(String userId, Pageable pageable) {
+        String orderId = orderRepository.findOrderIdByUserId(userId);
+        return orderItemService.getOrderItemsByOrderId(orderId, pageable);
     }
 }

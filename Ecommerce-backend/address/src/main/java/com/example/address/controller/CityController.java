@@ -4,9 +4,7 @@ import com.example.address.entity.Address;
 import com.example.address.entity.City;
 import com.example.address.service.CityService;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,13 +22,7 @@ public class CityController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<City>> getCities(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "desc") String sortDirection) {
-
-        Sort sort = Sort.by(sortDirection.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, "lastUpdate");
-        Pageable pageable = PageRequest.of(page, size, sort);
+    public ResponseEntity<Page<City>> getCities(Pageable pageable) {
 
         Page<City> cities = cityService.getCities(pageable);
         return ResponseEntity.ok(cities);
@@ -75,12 +67,9 @@ public class CityController {
         return ResponseEntity.ok("City deleted successfully!");
     }
 
-    @GetMapping({"/{id}/addresses"})
+    @GetMapping("/{id}/addresses")
     public ResponseEntity<List<Address>> getCityAddresses(@PathVariable String id){
-        City city = cityService.getCityById(id);
-        if(city == null)
-            return ResponseEntity.notFound().build();
-        List<Address> addressList = city.getAddresses();
+        List<Address> addressList = cityService.getCityAddresses(id);
         if(addressList.isEmpty())
             return ResponseEntity.noContent().build();
         return ResponseEntity.ok(addressList);

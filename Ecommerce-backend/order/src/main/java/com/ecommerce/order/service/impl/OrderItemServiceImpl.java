@@ -1,8 +1,8 @@
-package com.ecommerce.order_items.service.impl;
+package com.ecommerce.order.service.impl;
 
-import com.ecommerce.order_items.entity.OrderItem;
-import com.ecommerce.order_items.repository.OrderItemRepository;
-import com.ecommerce.order_items.service.OrderItemService;
+import com.ecommerce.order.entity.OrderItem;
+import com.ecommerce.order.repository.OrderItemRepository;
+import com.ecommerce.order.service.OrderItemService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -10,9 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
-import java.sql.Timestamp;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeParseException;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -27,6 +25,11 @@ public class OrderItemServiceImpl implements OrderItemService {
     @Override
     public Page<OrderItem> getOrderItems(Pageable pageable) {
         return orderItemRepository.findAll(pageable);
+    }
+
+    @Override
+    public Page<OrderItem> getOrderItemsByOrderId(String orderId, Pageable pageable) {
+        return orderItemRepository.findByOrderId(orderId, pageable);
     }
 
     @Override

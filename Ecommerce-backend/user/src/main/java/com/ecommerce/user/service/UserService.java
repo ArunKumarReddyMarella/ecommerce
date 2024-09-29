@@ -1,5 +1,6 @@
 package com.ecommerce.user.service;
 
+import com.ecommerce.user.dto.OrderedProduct;
 import com.ecommerce.user.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,4 +21,6 @@ public interface UserService {
     User updateUser(User updatedUser);
 
     void patchUser(String userId, Map<String, Object> updates);
+
+    Page<OrderedProduct> getOrderedProducts(String userId, Pageable pageable);
 }

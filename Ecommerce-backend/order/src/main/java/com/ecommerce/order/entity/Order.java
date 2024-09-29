@@ -23,7 +23,7 @@ public class Order {
     @NotBlank(message = "Order ID cannot be blank")
     private String orderId;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     @NotBlank(message = "User ID cannot be blank")
     private String userId;
 

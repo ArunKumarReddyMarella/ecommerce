@@ -1,24 +1,27 @@
 package com.ecommerce.user.service.impl;
 
+import com.ecommerce.order.service.OrderService;
+import com.ecommerce.user.dto.OrderedProduct;
 import com.ecommerce.user.entity.User;
+import com.ecommerce.order.entity.OrderItem;
 import com.ecommerce.user.repository.UserRepository;
 import com.ecommerce.user.service.UserService;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.lang.reflect.Field;
 import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -27,8 +30,11 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    private final OrderService orderService;
+
+    public UserServiceImpl(UserRepository userRepository, OrderService orderService) {
         this.userRepository = userRepository;
+        this.orderService = orderService;
     }
 
     @Override
@@ -105,5 +111,19 @@ public class UserServiceImpl implements UserService {
 
 
         userRepository.save(existingUser);
+    }
+
+    @Override
+    public Page<OrderedProduct> getOrderedProducts(String userId, Pageable pageable) {
+        var orderedItems = orderService.getOrderItemsByUserId(userId, pageable);
+        List<OrderedProduct> orderedProducts = orderedItems.getContent().stream().map(orderItem -> {
+           var OrderedProduct = new OrderedProduct();
+           OrderedProduct.setProductId(orderItem.getProductId());
+           OrderedProduct.setQuantity(orderItem.getQuantity());
+           OrderedProduct.setTotalPrice(orderItem.getPrice());
+           return OrderedProduct;
+        }).collect(Collectors.toList());
+
+        return new PageImpl<>(orderedProducts, pageable, orderedItems.getTotalElements());
     }
 }

@@ -1,5 +1,6 @@
 package com.example.address.service.impl;
 
+import com.example.address.entity.Address;
 import com.example.address.entity.City;
 import com.example.address.repository.CityRepository;
 import com.example.address.service.CityService;
@@ -13,6 +14,7 @@ import java.lang.reflect.Field;
 import java.sql.Timestamp;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -86,6 +88,13 @@ public class CityServiceImpl implements CityService {
         cityRepository.deleteById(id);
     }
 
-
+    @Override
+    public List<Address> getCityAddresses(String id) {
+        Optional<City> optionalCity = cityRepository.findById(id);
+        if (optionalCity.isEmpty())
+            return null;
+        return optionalCity.get().getAddresses();
+    }
+    
 }
 

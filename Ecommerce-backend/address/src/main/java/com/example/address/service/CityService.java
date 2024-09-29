@@ -1,10 +1,12 @@
 package com.example.address.service;
 
+import com.example.address.entity.Address;
 import com.example.address.entity.City;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -15,7 +17,6 @@ public interface CityService {
     City updateCity(City city);
     void patchCity(String id, Map<String, Object> updates);
     void deleteCity(String id);
-
-
+    List<Address> getCityAddresses(String id);
 }
 

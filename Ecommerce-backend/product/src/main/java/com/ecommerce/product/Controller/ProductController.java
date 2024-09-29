@@ -2,6 +2,7 @@ package com.ecommerce.product.Controller;
 
 import com.ecommerce.product.Entity.Product;
 import com.ecommerce.product.Service.ProductService;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -47,13 +48,13 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<Product> createProduct(@RequestBody Product product){
+    public ResponseEntity<Product> createProduct(@RequestBody @Valid Product product){
         Product createdProduct = productService.createProduct(product);
         return ResponseEntity.ok(createdProduct);
     }
 
     @PutMapping("/{productId}")
-    public ResponseEntity<Product> updateProduct(@PathVariable String productId, @RequestBody Product product) {
+    public ResponseEntity<Product> updateProduct(@PathVariable String productId, @RequestBody @Valid Product product) {
 //        product.setProductId(productId); // Ensure ID matches path variable
         Product updatedProduct = productService.updateProduct(product);
         if (updatedProduct == null) {
