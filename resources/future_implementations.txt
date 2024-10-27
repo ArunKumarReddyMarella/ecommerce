@@ -2,5 +2,14 @@ future implementations
 
 1)logging with AOP
 2)ENUM(order status)
+2.1)schedule task for order cancelation if payment not happen in the given time period
 3) global Exception Handling
 4) informative response
+
+6) DB Indexing
+7) Caching
+8) Security
+9) API Documentation
+10) API Performance Testing
+11) Error Handling: Implementing robust error handling mechanisms to provide informative feedback to users.
+12) AOP: Using Aspect-Oriented Programming for cross-cutting concerns like logging, security, and caching.
