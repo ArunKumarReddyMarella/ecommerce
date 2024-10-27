@@ -16,5 +16,5 @@ public interface ProductService {
     public void deleteProduct(String Id);
 
     public Product updateProduct(Product updatedProduct);
-    public void patchProduct(String productId, Map<String, Object> updates);
+    public Product patchProduct(String productId, Map<String, Object> updates);
 }

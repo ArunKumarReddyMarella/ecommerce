@@ -62,20 +62,12 @@ public class ProductController {
     public ResponseEntity<Product> updateProduct(@PathVariable String productId, @RequestBody @Valid Product product) {
 //        product.setProductId(productId); // Ensure ID matches path variable
         Product updatedProduct = productService.updateProduct(product);
-        if (updatedProduct == null) {
-            return ResponseEntity.notFound().build();
-        }
         return ResponseEntity.ok(updatedProduct);
     }
 
     @PatchMapping("/{productId}")
     public ResponseEntity<Product> patchProduct(@PathVariable String productId, @RequestBody Map<String, Object> updates) {
-        Product existingProduct = productService.getProductById(productId);
-        if (existingProduct == null) {
-            return ResponseEntity.notFound().build();
-        }
-        productService.patchProduct(productId, updates); // Delegate patching logic to service
-        Product updatedProduct = productService.getProductById(productId); // Refetch after patching
+        Product updatedProduct = productService.patchProduct(productId, updates); // Delegate patching logic to service
         return ResponseEntity.ok(updatedProduct);
     }
 

@@ -5,6 +5,9 @@ import com.ecommerce.product.Repository.ProductRepository;
 import com.ecommerce.product.Service.ProductService;
 import com.ecommerce.product.exception.ProductAlreadyExistsException;
 import com.ecommerce.product.exception.ProductNotFoundException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,10 +16,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Field;
-import java.sql.Timestamp;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -89,35 +88,45 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void patchProduct(String productId, Map<String, Object> updates) {
+    public Product patchProduct(String productId, Map<String, Object> updates) {
         logger.debug("Patching product with ID: {} with updates: {}", productId, updates);
         Product existingProduct = productRepository.findById(productId).orElseThrow(() -> new ProductNotFoundException("Product with ID " + productId + " not found."));
 
-        updates.forEach((key, value) -> {
-            try {
-                // Use reflection or property accessors to update specific fields based on the key
-                Field field = Product.class.getDeclaredField(key);
-                field.setAccessible(true);
-                if (field.getType() == Timestamp.class) {
-                    try {
-                        // Use OffsetDateTime to parse the ISO 8601 format
-                        OffsetDateTime odt = OffsetDateTime.parse((String) value);
-                        Timestamp timestampValue = Timestamp.from(odt.toInstant());
-                        field.set(existingProduct, timestampValue);
-                    } catch (DateTimeParseException e) {
-                        throw new IllegalArgumentException("Invalid format for "+key+" TimeStamp field");
-                    }
-                } else {
-                    // Set other field types as usual
-                    field.set(existingProduct, value);
-                }
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                // Handle potential exceptions (e.g., invalid field name)
-                throw new IllegalArgumentException("Invalid update field: " + key);
-            }
-        });
+//        updates.forEach((key, value) -> {
+//            try {
+//                // Use reflection or property accessors to update specific fields based on the key
+//                Field field = Product.class.getDeclaredField(key);
+//                field.setAccessible(true);
+//                if (field.getType() == Timestamp.class) {
+//                    try {
+//                        // Use OffsetDateTime to parse the ISO 8601 format
+//                        OffsetDateTime odt = OffsetDateTime.parse((String) value);
+//                        Timestamp timestampValue = Timestamp.from(odt.toInstant());
+//                        field.set(existingProduct, timestampValue);
+//                    } catch (DateTimeParseException e) {
+//                        throw new IllegalArgumentException("Invalid format for "+key+" TimeStamp field");
+//                    }
+//                } else {
+//                    // Set other field types as usual
+//                    field.set(existingProduct, value);
+//                }
+//            } catch (NoSuchFieldException | IllegalAccessException e) {
+//                // Handle potential exceptions (e.g., invalid field name)
+//                throw new IllegalArgumentException("Invalid update field: " + key);
+//            }
+//        });
 
-        productRepository.save(existingProduct);
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule()); // for Timestamp support
+
+        try {
+            // assuming updates is a Map<String, Object>
+            mapper.updateValue(existingProduct, updates);
+        }catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Invalid update field: " + updates);
+        }
+
+        return productRepository.save(existingProduct);
     }
 
 //    @Override
