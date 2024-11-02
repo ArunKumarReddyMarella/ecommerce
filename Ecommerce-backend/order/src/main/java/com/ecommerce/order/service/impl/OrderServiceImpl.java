@@ -2,6 +2,8 @@ package com.ecommerce.order.service.impl;
 
 import com.ecommerce.order.entity.Order;
 import com.ecommerce.order.entity.OrderItem;
+import com.ecommerce.order.exception.OrderAlreadyExistException;
+import com.ecommerce.order.exception.OrderNotFoundException;
 import com.ecommerce.order.repository.OrderRepository;
 import com.ecommerce.order.service.OrderItemService;
 import com.ecommerce.order.service.OrderService;
@@ -37,8 +39,10 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Order getOrderById(String id) {
-        Optional<Order> optionalOrder = orderRepository.findById(id);
-        return optionalOrder.orElse(null);
+//        Optional<Order> optionalOrder = orderRepository.findById(id);
+//        return optionalOrder.orElse(null);
+        Order order = orderRepository.findById(id).orElseThrow(() -> new OrderNotFoundException("Order not found with ID: " + id));
+        return order;
     }
 
     @Override
@@ -46,9 +50,9 @@ public class OrderServiceImpl implements OrderService {
         if(order.getOrderId() == null)
             order.setOrderId(UUID.randomUUID().toString());
         else {
-            Optional<Order> existingOrder = orderRepository.findById(order.getOrderId());
-            if (existingOrder.isPresent()) {
-                throw new RuntimeException("Order with ID " + order.getOrderId() + " already exists.");
+            Boolean existingOrder = orderRepository.existsById(order.getOrderId());
+            if (existingOrder) {
+                throw new OrderAlreadyExistException("Order with ID " + order.getOrderId() + " already exists.");
             }
         }
         return orderRepository.saveAndFlush(order);
@@ -56,12 +60,16 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Order updateOrder(Order updatedOrder) {
+        Boolean existingOrder = orderRepository.existsById(updatedOrder.getOrderId());
+        if (!existingOrder) {
+            throw new OrderNotFoundException("Order not found with ID: " + updatedOrder.getOrderId());
+        }
         return orderRepository.saveAndFlush(updatedOrder);
     }
 
     @Override
     public void patchOrder(String orderId, Map<String, Object> updates) {
-        Order existingOrder = orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Order not found"));
+        Order existingOrder = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException("Order not found with ID: " + orderId));
         updates.forEach((key, value) -> {
             try {
                 Field field = Order.class.getDeclaredField(key);
@@ -86,6 +94,10 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void deleteOrder(String id) {
+        Boolean existingOrder = orderRepository.existsById(id);
+        if (!existingOrder) {
+            throw new OrderNotFoundException("Order not found with ID: " + id);
+        }
         orderRepository.deleteById(id);
     }
 

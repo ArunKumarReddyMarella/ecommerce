@@ -2,6 +2,7 @@ package com.ecommerce.product.Controller;
 
 import com.ecommerce.product.Entity.Product;
 import com.ecommerce.product.Service.ProductService;
+import com.ecommerce.product.bean.ProductExportBean;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,10 +10,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/products")
@@ -76,5 +80,15 @@ public class ProductController {
         productService.deleteProduct(id);
         return ResponseEntity.ok("product deleted successfully!.");
     }
+
+//    @GetMapping("/export")
+//    public ResponseEntity exportProducts(@RequestParam String format, @Valid ProductExportBean productExportBean) {
+//        byte[] exportedFile = productService.exportProducts(format, productExportBean);
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setContentType(MediaType.parseMediaType("text/csv"));
+//        headers.setContentDispositionFormData("attachment", "products.csv");
+//        return ResponseEntity.ok().headers(headers).body(exportedFile);
+//
+//    }
 
 }

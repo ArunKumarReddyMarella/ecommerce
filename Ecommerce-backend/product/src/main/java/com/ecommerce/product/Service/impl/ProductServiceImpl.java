@@ -1,11 +1,16 @@
 package com.ecommerce.product.Service.impl;
 
+import com.ecommerce.common.service.ExportService;
 import com.ecommerce.product.Entity.Product;
 import com.ecommerce.product.Repository.ProductRepository;
+import com.ecommerce.product.Repository.specification.ProductSpecification;
 import com.ecommerce.product.Service.ProductService;
+import com.ecommerce.product.bean.ProductExportBean;
 import com.ecommerce.product.exception.ProductAlreadyExistsException;
 import com.ecommerce.product.exception.ProductNotFoundException;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.transaction.Transactional;
@@ -14,8 +19,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.sql.SQLOutput;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -28,6 +37,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private ExportService exportService;
 
     @Override
     public Page<Product> getProducts(Pageable pageable) {
@@ -129,15 +141,20 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.save(existingProduct);
     }
 
-//    @Override
-//    public byte[] export(String fileType) {
-//        logger.debug("Exporting products with file type: {}", fileType);
-//        List<Product> products = productRepository.findAll();
-//        List<ProductExportBean> productExportBeans = products.stream().map(product -> {
-//            ProductToProductExportBeanMapper mapper = new ProductToProductExportBeanMapper();
-//            return mapper.ProductToProductExportBean(product);
-//        }).toList();
-//        return PdfExport.exportProductData(productExportBeans);
-//    }
+    @Override
+    public byte[] exportProducts(String format, ProductExportBean productExportBean) {
+        Specification<Product> specification = new ProductSpecification(productExportBean.getProductIDs(), productExportBean.getSelectedColumns());
+        List<Product> products = productRepository.findAll(specification);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String productsData = null;
+        try {
+            productsData = objectMapper.writeValueAsString(products);
+        }catch (JsonProcessingException e){
+            throw new RuntimeException("Failed to convert products to JSON", e);
+        }
+
+        return exportService.exportProduct(format,productExportBean.getSelectedColumns(),productsData);
+    }
+
 
 }

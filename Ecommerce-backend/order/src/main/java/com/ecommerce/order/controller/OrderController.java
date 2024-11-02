@@ -53,18 +53,11 @@ public class OrderController {
     public ResponseEntity<Order> updateOrder(@PathVariable String orderId, @RequestBody @Valid Order order) {
         order.setOrderId(orderId);
         Order updatedOrder = orderService.updateOrder(order);
-        if (updatedOrder == null) {
-            return ResponseEntity.notFound().build();
-        }
         return ResponseEntity.ok(updatedOrder);
     }
 
     @PatchMapping("/{orderId}")
     public ResponseEntity<Order> patchOrder(@PathVariable String orderId, @RequestBody Map<String, Object> updates) {
-        Order existingOrder = orderService.getOrderById(orderId);
-        if (existingOrder == null) {
-            return ResponseEntity.notFound().build();
-        }
         orderService.patchOrder(orderId, updates);
         Order updatedOrder = orderService.getOrderById(orderId);
         return ResponseEntity.ok(updatedOrder);

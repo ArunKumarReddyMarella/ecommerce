@@ -3,7 +3,7 @@ future implementations
 1)logging with AOP
 2)ENUM(order status)
 2.1)schedule task for order cancelation if payment not happen in the given time period
-3) global Exception Handling
+3) global Exception Handling(completed-product)
 4) informative response
 
 6) DB Indexing
