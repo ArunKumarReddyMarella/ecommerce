@@ -1,16 +1,13 @@
 package com.ecommerce.product.Service.impl;
 
-import com.ecommerce.common.service.ExportService;
+//import com.ecommerce.common.service.ExportService;
+
 import com.ecommerce.product.Entity.Product;
 import com.ecommerce.product.Repository.ProductRepository;
-import com.ecommerce.product.Repository.specification.ProductSpecification;
 import com.ecommerce.product.Service.ProductService;
-import com.ecommerce.product.bean.ProductExportBean;
 import com.ecommerce.product.exception.ProductAlreadyExistsException;
 import com.ecommerce.product.exception.ProductNotFoundException;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.transaction.Transactional;
@@ -19,12 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.sql.SQLOutput;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -38,8 +31,8 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     private ProductRepository productRepository;
 
-    @Autowired
-    private ExportService exportService;
+//    @Autowired
+//    private ExportService exportService;
 
     @Override
     public Page<Product> getProducts(Pageable pageable) {
@@ -56,7 +49,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product getProductByProductName(String productName){
+    public Product getProductByProductName(String productName) {
         logger.debug("Fetching product with productName: {}", productName);
         Optional<Product> optionalProduct = productRepository.findByProductName(productName);
         return optionalProduct.orElse(null);
@@ -65,7 +58,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Product createProduct(Product product) {
         logger.debug("Creating product: {}", product);
-        if(product.getProductId() == null)
+        if (product.getProductId() == null)
             product.setProductId(UUID.randomUUID().toString());
         else {
             Optional<Product> existingProduct = productRepository.findById(product.getProductId());
@@ -81,7 +74,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void deleteProduct(String Id) {
-        if(!productRepository.existsById(Id)) {
+        if (!productRepository.existsById(Id)) {
             logger.error("Product with ID {} not found.", Id);
             throw new ProductNotFoundException("Product with ID " + Id + " not found.");
         }
@@ -91,7 +84,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product updateProduct(Product updatedProduct) {
-        if(!productRepository.existsById(updatedProduct.getProductId())) {
+        if (!productRepository.existsById(updatedProduct.getProductId())) {
             logger.error("Product with ID {} not found.", updatedProduct.getProductId());
             throw new ProductNotFoundException("Product with ID " + updatedProduct.getProductId() + " not found.");
         }
@@ -134,27 +127,27 @@ public class ProductServiceImpl implements ProductService {
         try {
             // assuming updates is a Map<String, Object>
             mapper.updateValue(existingProduct, updates);
-        }catch (JsonProcessingException e) {
+        } catch (JsonProcessingException e) {
             throw new IllegalArgumentException("Invalid update field: " + updates);
         }
 
         return productRepository.save(existingProduct);
     }
 
-    @Override
-    public byte[] exportProducts(String format, ProductExportBean productExportBean) {
-        Specification<Product> specification = new ProductSpecification(productExportBean.getProductIDs(), productExportBean.getSelectedColumns());
-        List<Product> products = productRepository.findAll(specification);
-        ObjectMapper objectMapper = new ObjectMapper();
-        String productsData = null;
-        try {
-            productsData = objectMapper.writeValueAsString(products);
-        }catch (JsonProcessingException e){
-            throw new RuntimeException("Failed to convert products to JSON", e);
-        }
-
-        return exportService.exportProduct(format,productExportBean.getSelectedColumns(),productsData);
-    }
+//    @Override
+//    public byte[] exportProducts(String format, ProductExportBean productExportBean) {
+//        Specification<Product> specification = new ProductSpecification(productExportBean.getProductIDs(), productExportBean.getSelectedColumns());
+//        List<Product> products = productRepository.findAll(specification);
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        String productsData = null;
+//        try {
+//            productsData = objectMapper.writeValueAsString(products);
+//        }catch (JsonProcessingException e){
+//            throw new RuntimeException("Failed to convert products to JSON", e);
+//        }
+//
+//        return exportService.exportProduct(format,productExportBean.getSelectedColumns(),productsData);
+//    }
 
 
 }

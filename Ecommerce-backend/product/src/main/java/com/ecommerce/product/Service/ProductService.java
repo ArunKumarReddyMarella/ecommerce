@@ -25,5 +25,5 @@ public interface ProductService {
 
     public Product patchProduct(String productId, Map<String, Object> updates);
 
-    public byte[] exportProducts(String format, @Valid ProductExportBean productExportBean);
+//    public byte[] exportProducts(String format, @Valid ProductExportBean productExportBean);
 }

@@ -16,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/products")
@@ -31,10 +30,9 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<Product>> getProducts(
-            @RequestParam(defaultValue = "0") int page,  // Default to page 0
-            @RequestParam(defaultValue = "10") int size, // Default to 10 items per page
-            @RequestParam(defaultValue = "desc") String sortDirection) {
+    public ResponseEntity<Page<Product>> getProducts(@RequestParam(defaultValue = "0") int page,  // Default to page 0
+                                                     @RequestParam(defaultValue = "10") int size, // Default to 10 items per page
+                                                     @RequestParam(defaultValue = "desc") String sortDirection) {
         logger.debug("Fetching products with page: {}, size: {}, sortDirection: {}", page, size, sortDirection);
         Sort sort = Sort.by(sortDirection.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, "retailPrice"); // Example: sorting by productName
         Pageable pageable = PageRequest.of(page, size, sort);
