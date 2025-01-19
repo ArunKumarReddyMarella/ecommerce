@@ -1,8 +1,13 @@
 package com.example.address.service.impl;
 
 import com.example.address.entity.Address;
+import com.example.address.exception.AddressAlreadyExistsException;
+import com.example.address.exception.AddressNotFoundException;
 import com.example.address.repository.AddressRepository;
 import com.example.address.service.AddressService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -31,8 +36,8 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public Address getAddressById(String id) {
-        Optional<Address> optionalAddress = addressRepository.findById(id);
-        return optionalAddress.orElse(null);
+        Address optionalAddress = addressRepository.findById(id).orElseThrow(() -> new AddressNotFoundException("Address not found with ID: " + id));
+        return optionalAddress;
     }
 
     @Override
@@ -42,7 +47,7 @@ public class AddressServiceImpl implements AddressService {
         else {
             Optional<Address> existingAddress = addressRepository.findById(address.getAddressId());
             if (existingAddress.isPresent()) {
-                throw new RuntimeException("Address with ID " + address.getAddressId() + " already exists.");
+                throw new AddressAlreadyExistsException("Address with ID " + address.getAddressId() + " already exists.");
             }
         }
         return addressRepository.saveAndFlush(address);
@@ -50,39 +55,38 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public Address updateAddress(Address address) {
+        if(!address.getAddressId().isEmpty()) {
+            Optional<Address> existingAddress = addressRepository.findById(address.getAddressId());
+            if (existingAddress.isEmpty()) {
+                throw new AddressNotFoundException("Address not found with ID: " + address.getAddressId());
+            }
+        }
         return addressRepository.saveAndFlush(address);
     }
 
     @Override
     public void patchAddress(String id, Map<String, Object> updates) {
         Address existingAddress = addressRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Address not found"));
+                .orElseThrow(() -> new AddressNotFoundException("Address not found with ID: " + id));
 
-        updates.forEach((key, value) -> {
-            try {
-                Field field = Address.class.getDeclaredField(key);
-                field.setAccessible(true);
-                if (field.getType() == Timestamp.class) {
-                    try {
-                        OffsetDateTime odt = OffsetDateTime.parse((String) value);
-                        Timestamp timestampValue = Timestamp.from(odt.toInstant());
-                        field.set(existingAddress, timestampValue);
-                    } catch (DateTimeParseException e) {
-                        throw new IllegalArgumentException("Invalid format for " + key + " TimeStamp field");
-                    }
-                } else {
-                    field.set(existingAddress, value);
-                }
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                throw new IllegalArgumentException("Invalid update field: " + key);
-            }
-        });
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule()); // for Timestamp support
+
+        try {
+            // assuming updates is a Map<String, Object>
+            mapper.updateValue(existingAddress, updates);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Invalid update field: " + updates);
+        }
 
         addressRepository.save(existingAddress);
     }
 
     @Override
     public void deleteAddress(String id) {
+        if(!addressRepository.existsById(id)) {
+            throw new AddressNotFoundException("Address not found with ID: " + id);
+        }
         addressRepository.deleteById(id);
     }
 }
