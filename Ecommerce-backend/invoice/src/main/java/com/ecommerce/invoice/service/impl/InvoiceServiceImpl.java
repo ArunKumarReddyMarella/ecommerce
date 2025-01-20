@@ -1,8 +1,13 @@
 package com.ecommerce.invoice.service.impl;
 
 import com.ecommerce.invoice.entity.Invoice;
+import com.ecommerce.invoice.exception.InvoiceAlreadyExistsException;
+import com.ecommerce.invoice.exception.InvoiceNotFoundException;
 import com.ecommerce.invoice.repository.InvoiceRepository;
 import com.ecommerce.invoice.service.InvoiceService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -32,8 +37,8 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Override
     public Invoice getInvoiceById(String invoiceId) {
-        Optional<Invoice> optionalInvoice = invoiceRepository.findById(invoiceId);
-        return optionalInvoice.orElse(null);
+        Invoice optionalInvoice = invoiceRepository.findById(invoiceId).orElseThrow(() -> new InvoiceNotFoundException("Invoice not found with ID: " + invoiceId));
+        return optionalInvoice;
     }
 
     @Override
@@ -43,7 +48,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         else {
             Optional<Invoice> existingInvoice = invoiceRepository.findById(invoice.getInvoiceId());
             if (existingInvoice.isPresent()) {
-                throw new RuntimeException("Invoice with ID " + invoice.getInvoiceId() + " already exists.");
+                throw new InvoiceAlreadyExistsException("Invoice with ID " + invoice.getInvoiceId() + " already exists.");
             }
         }
         return invoiceRepository.saveAndFlush(invoice);
@@ -51,44 +56,34 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Override
     public Invoice updateInvoice(Invoice updatedInvoice) {
+        if(!invoiceRepository.existsById(updatedInvoice.getInvoiceId())) {
+            throw new InvoiceNotFoundException("Invoice not found with ID: " + updatedInvoice.getInvoiceId());
+        }
         return invoiceRepository.saveAndFlush(updatedInvoice);
     }
 
     @Override
     public void patchInvoice(String invoiceId, Map<String, Object> updates) {
         Invoice existingInvoice = invoiceRepository.findById(invoiceId)
-                .orElseThrow(() -> new RuntimeException("Invoice not found"));
+                .orElseThrow(() -> new InvoiceNotFoundException("Invoice not found with ID: " + invoiceId));
 
-        updates.forEach((key, value) -> {
-            try {
-                Field field = Invoice.class.getDeclaredField(key);
-                field.setAccessible(true);
-                if (field.getType() == Timestamp.class) {
-                    try {
-                        OffsetDateTime odt = OffsetDateTime.parse((String) value);
-                        Timestamp timestampValue = Timestamp.from(odt.toInstant());
-                        field.set(existingInvoice, timestampValue);
-                    } catch (DateTimeParseException e) {
-                        throw new IllegalArgumentException("Invalid format for " + key + " TimeStamp field");
-                    }
-                }
-                else if (field.getType().equals(BigDecimal.class)) {
-                    value = new BigDecimal((Integer) value);
-                    field.set(existingInvoice, value);
-                }
-                else {
-                    field.set(existingInvoice, value);
-                }
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                throw new IllegalArgumentException("Invalid update field: " + key);
-            }
-        });
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule()); // for Timestamp support
 
+        try {
+            // assuming updates is a Map<String, Object>
+            mapper.updateValue(existingInvoice, updates);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Invalid update field: " + updates);
+        }
         invoiceRepository.save(existingInvoice);
     }
 
     @Override
     public void deleteInvoice(String invoiceId) {
-        invoiceRepository.deleteById(invoiceId);
+        if(!invoiceRepository.existsById(invoiceId)) {
+            throw new InvoiceNotFoundException("Invoice not found with ID: " + invoiceId);
+        }
+            invoiceRepository.deleteById(invoiceId);
     }
 }

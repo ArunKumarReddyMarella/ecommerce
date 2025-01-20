@@ -4,8 +4,13 @@ import com.ecommerce.order.service.OrderService;
 import com.ecommerce.user.dto.OrderedProduct;
 import com.ecommerce.user.entity.User;
 import com.ecommerce.order.entity.OrderItem;
+import com.ecommerce.user.exception.UserAlreadyExistsException;
+import com.ecommerce.user.exception.UserNotFoundException;
 import com.ecommerce.user.repository.UserRepository;
 import com.ecommerce.user.service.UserService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 
@@ -44,17 +49,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserById(String userId) {
-        Optional<User> optionalUser = userRepository.findById(userId);
-        return optionalUser.orElse(null);
+        User optionalUser = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
+        return optionalUser;
     }
 
     @Override
     public User getUserByUsername(String username) {
-        Optional<User> optionalUser = userRepository.findByUsername(username);
-        if (optionalUser.isEmpty()) {
-            return null;
-        }
-        return optionalUser.get();
+        User optionalUser = userRepository.findByUsername(username).orElseThrow(() -> new UserNotFoundException("User not found with username: " + username));
+        return optionalUser;
     }
 
     @Override
@@ -65,7 +67,7 @@ public class UserServiceImpl implements UserService {
         else{
             Optional<User> existingUser = userRepository.findById(user.getUserId());
             if (existingUser.isPresent()) {
-                throw new RuntimeException("User with ID " + user.getUserId() + " already exists.");
+                throw new UserAlreadyExistsException("User with ID " + user.getUserId() + " already exists.");
             }
         }
         return userRepository.saveAndFlush(user);
@@ -73,42 +75,33 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(String userId) {
+        if(!userRepository.existsById(userId)){
+            throw new UserNotFoundException("User not found with ID: " + userId);
+        }
         userRepository.deleteById(userId);
     }
 
     @Override
     public User updateUser(User updatedUser) {
+        if (!userRepository.existsById(updatedUser.getUserId())) {
+            throw new UserNotFoundException("User not found with ID: " + updatedUser.getUserId());
+        }
         return userRepository.saveAndFlush(updatedUser);
     }
 
     @Override
     public void patchUser(String userId, Map<String, Object> updates) {
-        User existingUser = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        User existingUser = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
 
-        updates.forEach((key, value) -> {
-            try {
-                // Use reflection or property accessors to update specific fields based on the key
-                Field field = User.class.getDeclaredField(key);
-                field.setAccessible(true);
-                if (field.getType() == Timestamp.class) {
-                    try {
-                        // Use OffsetDateTime to parse the ISO 8601 format
-                        OffsetDateTime odt = OffsetDateTime.parse((String) value);
-                        Timestamp timestampValue = Timestamp.from(odt.toInstant());
-                        field.set(existingUser, timestampValue);
-                    } catch (DateTimeParseException e) {
-                        throw new IllegalArgumentException("Invalid format for "+key+" TimeStamp field");
-                    }
-                } else {
-                    // Set other field types as usual
-                    field.set(existingUser, value);
-                }
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                // Handle potential exceptions (e.g., invalid field name)
-                throw new IllegalArgumentException("Invalid update field: " + key);
-            }
-        });
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule()); // for Timestamp support
 
+        try {
+            // assuming updates is a Map<String, Object>
+            mapper.updateValue(existingUser, updates);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Invalid update field: " + updates);
+        }
 
         userRepository.save(existingUser);
     }

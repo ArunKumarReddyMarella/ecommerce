@@ -1,8 +1,13 @@
 package com.ecommerce.rating.service.impl;
 
 import com.ecommerce.rating.entity.Rating;
+import com.ecommerce.rating.exception.RatingAlreadyExistsException;
+import com.ecommerce.rating.exception.RatingNotFoundException;
 import com.ecommerce.rating.repository.RatingRepository;
 import com.ecommerce.rating.service.RatingService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -31,8 +36,8 @@ public class RatingServiceImpl implements RatingService {
 
     @Override
     public Rating getRatingById(String ratingId) {
-        Optional<Rating> optionalRating = ratingRepository.findById(ratingId);
-        return optionalRating.orElse(null);
+        Rating optionalRating = ratingRepository.findById(ratingId).orElseThrow(() -> new RatingNotFoundException("Rating not found with ID: " + ratingId));
+        return optionalRating;
     }
 
     @Override
@@ -42,7 +47,7 @@ public class RatingServiceImpl implements RatingService {
         else {
             Optional<Rating> existingRating = ratingRepository.findById(rating.getRatingId());
             if (existingRating.isPresent()) {
-                throw new RuntimeException("Rating with ID " + rating.getRatingId() + " already exists.");
+                throw new RatingAlreadyExistsException("Rating with ID " + rating.getRatingId() + " already exists.");
             }
         }
         return ratingRepository.saveAndFlush(rating);
@@ -50,39 +55,32 @@ public class RatingServiceImpl implements RatingService {
 
     @Override
     public Rating updateRating(Rating updatedRating) {
+        if(!ratingRepository.existsById(updatedRating.getRatingId()))
+            throw new RatingNotFoundException("Rating not found with ID: " + updatedRating.getRatingId());
         return ratingRepository.saveAndFlush(updatedRating);
     }
 
     @Override
     public void patchRating(String ratingId, Map<String, Object> updates) {
         Rating existingRating = ratingRepository.findById(ratingId)
-                .orElseThrow(() -> new RuntimeException("Rating not found"));
+                .orElseThrow(() -> new RatingNotFoundException("Rating not found with ID: " + ratingId));
 
-        updates.forEach((key, value) -> {
-            try {
-                Field field = Rating.class.getDeclaredField(key);
-                field.setAccessible(true);
-                if (field.getType() == Timestamp.class) {
-                    try {
-                        OffsetDateTime odt = OffsetDateTime.parse((String) value);
-                        Timestamp timestampValue = Timestamp.from(odt.toInstant());
-                        field.set(existingRating, timestampValue);
-                    } catch (DateTimeParseException e) {
-                        throw new IllegalArgumentException("Invalid format for " + key + " TimeStamp field");
-                    }
-                } else {
-                    field.set(existingRating, value);
-                }
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                throw new IllegalArgumentException("Invalid update field: " + key);
-            }
-        });
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule()); // for Timestamp support
 
+        try {
+            // assuming updates is a Map<String, Object>
+            mapper.updateValue(existingRating, updates);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Invalid update field: " + updates);
+        }
         ratingRepository.save(existingRating);
     }
 
     @Override
     public void deleteRating(String ratingId) {
+        if(!ratingRepository.existsById(ratingId))
+            throw new RatingNotFoundException("Rating not found with ID: " + ratingId);
         ratingRepository.deleteById(ratingId);
     }
 }

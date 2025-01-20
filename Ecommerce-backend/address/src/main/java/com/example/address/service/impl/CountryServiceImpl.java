@@ -1,8 +1,13 @@
 package com.example.address.service.impl;
 
 import com.example.address.entity.Country;
+import com.example.address.exception.CountryAlreadyExistsException;
+import com.example.address.exception.CountryNotFoundException;
 import com.example.address.repository.CountryRepository;
 import com.example.address.service.CountryService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -31,8 +36,8 @@ public class CountryServiceImpl implements CountryService {
 
     @Override
     public Country getCountryById(String id) {
-        Optional<Country> optionalCountry = countryRepository.findById(id);
-        return optionalCountry.orElse(null);
+        Country optionalCountry = countryRepository.findById(id).orElseThrow(() -> new CountryNotFoundException("Country not found with ID: " + id));
+        return optionalCountry;
     }
 
     @Override
@@ -42,7 +47,7 @@ public class CountryServiceImpl implements CountryService {
         else {
             Optional<Country> existingCountry = countryRepository.findById(country.getCountryId());
             if (existingCountry.isPresent()) {
-                throw new RuntimeException("Country with ID " + country.getCountryId() + " already exists.");
+                throw new CountryAlreadyExistsException("Country with ID " + country.getCountryId() + " already exists.");
             }
         }
         return countryRepository.saveAndFlush(country);
@@ -50,39 +55,34 @@ public class CountryServiceImpl implements CountryService {
 
     @Override
     public Country updateCountry(Country country) {
+        if(!countryRepository.existsById(country.getCountryId()))
+            throw new CountryNotFoundException("Country not found with ID: " + country.getCountryId());
         return countryRepository.saveAndFlush(country);
     }
 
     @Override
     public void patchCountry(String id, Map<String, Object> updates) {
         Country existingCountry = countryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Country not found"));
+                .orElseThrow(() -> new CountryNotFoundException("Country not found"));
 
-        updates.forEach((key, value) -> {
-            try {
-                Field field = Country.class.getDeclaredField(key);
-                field.setAccessible(true);
-                if (field.getType() == Timestamp.class) {
-                    try {
-                        OffsetDateTime odt = OffsetDateTime.parse((String) value);
-                        Timestamp timestampValue = Timestamp.from(odt.toInstant());
-                        field.set(existingCountry, timestampValue);
-                    } catch (DateTimeParseException e) {
-                        throw new IllegalArgumentException("Invalid format for " + key + " TimeStamp field");
-                    }
-                } else {
-                    field.set(existingCountry, value);
-                }
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                throw new IllegalArgumentException("Invalid update field: " + key);
-            }
-        });
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule()); // for Timestamp support
+
+        try {
+            // assuming updates is a Map<String, Object>
+            mapper.updateValue(existingCountry, updates);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Invalid update field: " + updates);
+        }
 
         countryRepository.save(existingCountry);
     }
 
     @Override
     public void deleteCountry(String id) {
+        if(!countryRepository.existsById(id)) {
+            throw new CountryNotFoundException("Country not found with ID " + id);
+        }
         countryRepository.deleteById(id);
     }
 }

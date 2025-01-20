@@ -1,6 +1,8 @@
 package com.ecommerce.wishlist.service.impl;
 
 import com.ecommerce.wishlist.entity.Wishlist;
+import com.ecommerce.wishlist.exception.WishlistAlreadyExistsException;
+import com.ecommerce.wishlist.exception.WishlistNotFoundException;
 import com.ecommerce.wishlist.repository.WishlistRepository;
 import com.ecommerce.wishlist.service.WishlistService;
 import jakarta.transaction.Transactional;
@@ -29,8 +31,8 @@ public class WishlistServiceImpl implements WishlistService {
 
     @Override
     public Wishlist getWishlistById(String id) {
-        Optional<Wishlist> optionalWishlist = wishlistRepository.findById(id);
-        return optionalWishlist.orElse(null);
+        Wishlist optionalWishlist = wishlistRepository.findById(id).orElseThrow(() -> new WishlistNotFoundException("Wishlist not found with ID: " + id));
+        return optionalWishlist;
     }
 
     @Override
@@ -40,7 +42,7 @@ public class WishlistServiceImpl implements WishlistService {
         } else {
             Optional<Wishlist> existingWishlist = wishlistRepository.findById(wishlist.getWishlistId());
             if (existingWishlist.isPresent()) {
-                throw new RuntimeException("Wishlist with ID " + wishlist.getWishlistId() + " already exists.");
+                throw new WishlistAlreadyExistsException("Wishlist with ID " + wishlist.getWishlistId() + " already exists.");
             }
         }
         return wishlistRepository.saveAndFlush(wishlist);
@@ -48,11 +50,17 @@ public class WishlistServiceImpl implements WishlistService {
 
     @Override
     public void deleteWishlist(String id) {
+        if(!wishlistRepository.existsById(id)) {
+            throw new WishlistNotFoundException("Wishlist not found with ID: " + id);
+        }
         wishlistRepository.deleteById(id);
     }
 
     @Override
     public Wishlist updateWishlist(Wishlist updatedWishlist) {
+        if(!wishlistRepository.existsById(updatedWishlist.getWishlistId())) {
+            throw new WishlistNotFoundException("Wishlist not found with ID: " + updatedWishlist.getWishlistId());
+        }
         return wishlistRepository.saveAndFlush(updatedWishlist);
     }
 

@@ -1,8 +1,13 @@
 package com.ecommerce.cart.service.impl;
 
 import com.ecommerce.cart.entity.Cart;
+import com.ecommerce.cart.exception.CartAlreadyExistsException;
+import com.ecommerce.cart.exception.CartNotFoundException;
 import com.ecommerce.cart.repository.CartRepository;
 import com.ecommerce.cart.service.CartService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,13 +38,13 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public Cart getCartById(String cartId) {
-        Optional<Cart> optionalCart = cartRepository.findById(cartId);
-        return optionalCart.orElse(null);
+        Cart cart = cartRepository.findById(cartId).orElseThrow(() -> new CartNotFoundException("Cart not found with ID: " + cartId));
+        return cart;
     }
 
     @Override
     public Cart getCartByUserId(String userId) {
-        return cartRepository.findByUserId(userId).orElse(null);
+        return cartRepository.findByUserId(userId).orElseThrow(() -> new CartNotFoundException("Cart not found for user ID: " + userId));
     }
 
     @Override
@@ -49,7 +54,7 @@ public class CartServiceImpl implements CartService {
         } else {
             Optional<Cart> existingCart = cartRepository.findById(cart.getCartId());
             if (existingCart.isPresent()) {
-                throw new RuntimeException("Cart with ID " + cart.getCartId() + " already exists.");
+                throw new CartAlreadyExistsException("Cart with ID " + cart.getCartId() + " already exists.");
             }
         }
         return cartRepository.saveAndFlush(cart);
@@ -57,42 +62,28 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public void deleteCart(String cartId) {
+        if(!cartRepository.existsById(cartId)) throw new CartNotFoundException("Cart not found with ID: " + cartId);
         cartRepository.deleteById(cartId);
     }
 
     @Override
     public Cart updateCart(Cart updatedCart) {
+        if(!cartRepository.existsById(updatedCart.getCartId())) throw new CartNotFoundException("Cart not found with ID: " + updatedCart.getCartId());
         return cartRepository.saveAndFlush(updatedCart);
     }
 
     @Override
     public void patchCart(String cartId, Map<String, Object> updates) {
-        Cart existingCart = cartRepository.findById(cartId).orElseThrow(() -> new RuntimeException("Cart not found"));
+        Cart existingCart = cartRepository.findById(cartId).orElseThrow(() -> new CartNotFoundException("Cart not found with ID: " + cartId));
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule()); // for Timestamp support
 
-        updates.forEach((key, value) -> {
-            try {
-                // Use reflection or property accessors to update specific fields based on the key
-                Field field = Cart.class.getDeclaredField(key);
-                field.setAccessible(true);
-                if (field.getType() == Timestamp.class) {
-                    try {
-                        // Use OffsetDateTime to parse the ISO 8601 format
-                        OffsetDateTime odt = OffsetDateTime.parse((String) value);
-                        Timestamp timestampValue = Timestamp.from(odt.toInstant());
-                        field.set(existingCart, timestampValue);
-                    } catch (DateTimeParseException e) {
-                        throw new IllegalArgumentException("Invalid format for " + key + " TimeStamp field");
-                    }
-                } else {
-                    // Set other field types as usual
-                    field.set(existingCart, value);
-                }
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                // Handle potential exceptions (e.g., invalid field name)
-                throw new IllegalArgumentException("Invalid update field: " + key);
-            }
-        });
-
+        try {
+            // assuming updates is a Map<String, Object>
+            mapper.updateValue(existingCart, updates);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Invalid update field: " + updates);
+        }
         cartRepository.save(existingCart);
     }
 }
