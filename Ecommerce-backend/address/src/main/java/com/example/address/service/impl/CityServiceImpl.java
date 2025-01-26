@@ -2,8 +2,13 @@ package com.example.address.service.impl;
 
 import com.example.address.entity.Address;
 import com.example.address.entity.City;
+import com.example.address.exception.CityAlreadyExistsException;
+import com.example.address.exception.CityNotFoundException;
 import com.example.address.repository.CityRepository;
 import com.example.address.service.CityService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -33,8 +38,8 @@ public class CityServiceImpl implements CityService {
 
     @Override
     public City getCityById(String id) {
-        Optional<City> optionalCity = cityRepository.findById(id);
-        return optionalCity.orElse(null);
+        City optionalCity = cityRepository.findById(id).orElseThrow(() -> new CityNotFoundException("City not found"));
+        return optionalCity;
     }
 
     @Override
@@ -44,7 +49,7 @@ public class CityServiceImpl implements CityService {
         else {
             Optional<City> existingCity = cityRepository.findById(city.getCityId());
             if (existingCity.isPresent()) {
-                throw new RuntimeException("City with ID " + city.getCityId() + " already exists.");
+                throw new CityAlreadyExistsException("City with ID " + city.getCityId() + " already exists.");
             }
         }
         return cityRepository.saveAndFlush(city);
@@ -52,48 +57,40 @@ public class CityServiceImpl implements CityService {
 
     @Override
     public City updateCity(City city) {
+        if(!cityRepository.existsById(city.getCityId()))
+            throw new CityNotFoundException("City not found with ID " + city.getCityId());
         return cityRepository.saveAndFlush(city);
     }
 
     @Override
     public void patchCity(String id, Map<String, Object> updates) {
         City existingCity = cityRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("City not found"));
+                .orElseThrow(() -> new CityNotFoundException("City not found"));
 
-        updates.forEach((key, value) -> {
-            try {
-                Field field = City.class.getDeclaredField(key);
-                field.setAccessible(true);
-                if (field.getType() == Timestamp.class) {
-                    try {
-                        OffsetDateTime odt = OffsetDateTime.parse((String) value);
-                        Timestamp timestampValue = Timestamp.from(odt.toInstant());
-                        field.set(existingCity, timestampValue);
-                    } catch (DateTimeParseException e) {
-                        throw new IllegalArgumentException("Invalid format for " + key + " TimeStamp field");
-                    }
-                } else {
-                    field.set(existingCity, value);
-                }
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                throw new IllegalArgumentException("Invalid update field: " + key);
-            }
-        });
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule()); // for Timestamp support
+
+        try {
+            // assuming updates is a Map<String, Object>
+            mapper.updateValue(existingCity, updates);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Invalid update field: " + updates);
+        }
 
         cityRepository.save(existingCity);
     }
 
     @Override
     public void deleteCity(String id) {
+        if(!cityRepository.existsById(id))
+            throw new CityNotFoundException("City not found with ID " + id);
         cityRepository.deleteById(id);
     }
 
     @Override
     public List<Address> getCityAddresses(String id) {
-        Optional<City> optionalCity = cityRepository.findById(id);
-        if (optionalCity.isEmpty())
-            return null;
-        return optionalCity.get().getAddresses();
+        City optionalCity = cityRepository.findById(id).orElseThrow(() -> new CityNotFoundException("City not found with ID " + id));
+        return optionalCity.getAddresses();
     }
     
 }
