@@ -51,8 +51,9 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Product getProductByProductName(String productName) {
         logger.debug("Fetching product with productName: {}", productName);
-        Optional<Product> optionalProduct = productRepository.findByProductName(productName);
-        return optionalProduct.orElse(null);
+        Product product = productRepository.findByProductName(productName).orElseThrow(() -> new ProductNotFoundException("Product with productName " + productName + " not found"));
+        logger.debug("Product fetched: {}", product);
+        return product;
     }
 
     @Override
