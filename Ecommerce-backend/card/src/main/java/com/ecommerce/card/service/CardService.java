@@ -4,7 +4,6 @@ import com.ecommerce.card.entity.Card;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.List;
 import java.util.Map;
 
 public interface CardService {
@@ -19,7 +18,7 @@ public interface CardService {
 
     Card updateCard(Card updatedCard);
 
-    void patchCard(String cardId, Map<String, Object> updates);
+    Card patchCard(String cardId, Map<String, Object> updates);
 
     Card getCardByCardNumber(String cardNumber);
 }

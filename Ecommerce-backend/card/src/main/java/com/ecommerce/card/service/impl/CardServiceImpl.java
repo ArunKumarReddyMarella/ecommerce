@@ -14,16 +14,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Field;
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.Map;
 import java.util.Optional;
-import java.util.TimeZone;
 import java.util.UUID;
 
 @Service
@@ -74,7 +66,7 @@ public class CardServiceImpl implements CardService {
     }
 
     @Override
-    public void patchCard(String cardId, Map<String, Object> updates) {
+    public Card patchCard(String cardId, Map<String, Object> updates) {
         Card existingCard = cardRepository.findById(cardId).orElseThrow(() -> new CardNotFondException("Card not found with id: " + cardId));
 
         ObjectMapper mapper = new ObjectMapper();
@@ -89,6 +81,7 @@ public class CardServiceImpl implements CardService {
 
 
         cardRepository.save(existingCard);
+        return existingCard;
     }
 
     @Override
