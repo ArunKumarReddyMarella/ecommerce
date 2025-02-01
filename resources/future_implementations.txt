@@ -1,15 +1,22 @@
 future implementations
 
+-> env file for storing static data(db url,username,password)
 1)logging with AOP
 2)ENUM(order status)
 2.1)schedule task for order cancelation if payment not happen in the given time period
 3) global Exception Handling(completed-product)
 4) informative response
+5) Async Programming
+5.1) locking mechanism for data consistency in multi threaded application(https://youtu.be/lR6y-0RC5cc?si=z9elU7ErH9pRW6sQ)
 
 6) DB Indexing
+7) stored procedures(https://youtu.be/oWbKtmtPGpg?si=7pAKtqSmwsNSeuBc)
 7) Caching
 8) Security
 9) API Documentation
 10) API Performance Testing
 11) Error Handling: Implementing robust error handling mechanisms to provide informative feedback to users.
 12) AOP: Using Aspect-Oriented Programming for cross-cutting concerns like logging, security, and caching.
+
+13) messageing service
+14) notification service(email)

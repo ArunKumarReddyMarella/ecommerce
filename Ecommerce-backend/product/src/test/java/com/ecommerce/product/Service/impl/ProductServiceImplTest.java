@@ -6,14 +6,18 @@ import com.ecommerce.product.exception.ProductAlreadyExistsException;
 import com.ecommerce.product.exception.ProductNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +26,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class ProductServiceImplTest {
 
     @Mock
@@ -30,52 +35,79 @@ class ProductServiceImplTest {
     @InjectMocks
     private ProductServiceImpl productService;
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
-
     private static List<Product> getProducts() {
         List<Product> productList = new ArrayList<>();
         Product product1 = new Product();
         product1.setProductId("1");
+        product1.setCrawlTimestamp(Timestamp.valueOf(LocalDateTime.now()));
+        product1.setProductUrl("https://example.com/product1");
         product1.setProductName("Product 1");
-        product1.setProductDescription("Description 1");
+        product1.setCategories("Category 1");
+        product1.setPid("P001");
         product1.setRetailPrice(BigDecimal.TEN);
         product1.setDiscountedPrice(BigDecimal.ONE);
+        product1.setImageUrls("https://example.com/product1.jpg");
+        product1.setFkAdvantageProduct(false);
+        product1.setProductDescription("Description 1");
+        product1.setProductRating("4.5");
+        product1.setOverallRating("4.0");
+        product1.setBrand("Brand A");
+        product1.setProductSpecifications("Spec A");
         product1.setStockQuantity(10);
         product1.setQuantityUnit("pcs");
+        product1.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
         productList.add(product1);
+
         Product product2 = new Product();
         product2.setProductId("2");
+        product2.setCrawlTimestamp(Timestamp.valueOf(LocalDateTime.now()));
+        product2.setProductUrl("https://example.com/product2");
         product2.setProductName("Product 2");
+        product2.setCategories("Category 2");
+        product2.setPid("P002");
+        product2.setRetailPrice(BigDecimal.valueOf(15));
+        product2.setDiscountedPrice(BigDecimal.valueOf(8));
+        product2.setImageUrls("https://example.com/product2.jpg");
+        product2.setFkAdvantageProduct(true);
         product2.setProductDescription("Description 2");
-        product2.setRetailPrice(BigDecimal.TEN);
-        product2.setDiscountedPrice(BigDecimal.ONE);
-        product2.setStockQuantity(10);
-        product2.setQuantityUnit("pcs");
+        product2.setProductRating("3.5");
+        product2.setOverallRating("4.2");
+        product2.setBrand("Brand B");
+        product2.setProductSpecifications("Spec B");
+        product2.setStockQuantity(5);
+        product2.setQuantityUnit("units");
+        product2.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
         productList.add(product2);
         return productList;
     }
 
     private static Page<Product> getProducts(Pageable pageable) {
         List<Product> productList = getProducts();
-        Page<Product> expectedProducts = new PageImpl<>(productList, pageable, productList.size());
-        return expectedProducts;
+        return new PageImpl<>(productList, pageable, productList.size());
     }
 
     private static Product getProduct() {
         Product product = new Product();
         product.setProductId("1");
+        product.setCrawlTimestamp(Timestamp.valueOf(LocalDateTime.now()));
+        product.setProductUrl("https://example.com/product1");
         product.setProductName("Product 1");
-        product.setProductDescription("Description 1");
+        product.setCategories("Category 1");
+        product.setPid("P001");
         product.setRetailPrice(BigDecimal.TEN);
         product.setDiscountedPrice(BigDecimal.ONE);
+        product.setImageUrls("https://example.com/product1.jpg");
+        product.setFkAdvantageProduct(false);
+        product.setProductDescription("Description 1");
+        product.setProductRating("4.5");
+        product.setOverallRating("4.0");
+        product.setBrand("Brand A");
+        product.setProductSpecifications("Spec A");
         product.setStockQuantity(10);
         product.setQuantityUnit("pcs");
+        product.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
         return product;
     }
-
     @Test
     void testGetProducts() {
         // Prepare test data
@@ -89,7 +121,9 @@ class ProductServiceImplTest {
         Page<Product> actualProducts = productService.getProducts(pageable);
 
         // Verify the results
-        assertEquals(expectedProducts, actualProducts);
+        for(int i = 0; i < expectedProducts.getContent().size(); i++) {
+            assertProductFields(expectedProducts.getContent().get(i), actualProducts.getContent().get(i));
+        }
         verify(productRepository, times(1)).findAll(pageable);
     }
 
@@ -105,7 +139,8 @@ class ProductServiceImplTest {
         Product actualProduct = productService.getProductById(productId);
 
         // Verify the results
-        assertEquals(product, actualProduct);
+        assertProductFields(product, actualProduct);
+
         verify(productRepository, times(1)).findById(productId);
     }
 
@@ -132,7 +167,7 @@ class ProductServiceImplTest {
 
         Product actualProduct = productService.getProductByProductName(productName);
 
-        assertEquals(product, actualProduct);
+        assertProductFields(product, actualProduct);
         verify(productRepository, times(1)).findByProductName(productName);
     }
 
@@ -234,13 +269,13 @@ class ProductServiceImplTest {
 
         // Mock repository method
         when(productRepository.existsById(productId)).thenReturn(true);
-        when(productRepository.saveAndFlush(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
+//        when(productRepository.saveAndFlush(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(productRepository.saveAndFlush(any(Product.class))).thenReturn(updatedProduct);
         // Call the service method
         Product result = productService.updateProduct(updatedProduct);
 
         // Verify the results
-        assertEquals(updatedProduct, result);
+        assertProductFields(updatedProduct, result);
         verify(productRepository, times(1)).existsById(productId);
         verify(productRepository, times(1)).saveAndFlush(updatedProduct);
     }
@@ -306,4 +341,45 @@ class ProductServiceImplTest {
         verify(productRepository, times(1)).findById(productId);
         verify(productRepository, never()).save(any(Product.class));
     }
+
+    @Test
+    void testPatchProduct_InvalidData() {
+        // Prepare test data
+        String productId = "1";
+        Product existingProduct = getProduct();
+        Map<String, Object> updates = Map.of("invalidField", "Invalid Value");
+
+        // Mock repository method
+        when(productRepository.findById(productId)).thenReturn(Optional.of(existingProduct));
+
+        // Call the service method and assert exception
+        assertThrows(IllegalArgumentException.class, () -> productService.patchProduct(productId, updates));
+
+        // Verify the results
+        verify(productRepository, times(1)).findById(productId);
+        verify(productRepository, never()).save(any(Product.class));
+    }
+
+    private void assertProductFields(Product expected, Product actual) {
+        assertEquals(expected.getProductId(), actual.getProductId());
+        assertEquals(expected.getCrawlTimestamp(), actual.getCrawlTimestamp());
+        assertEquals(expected.getProductUrl(), actual.getProductUrl());
+        assertEquals(expected.getProductName(), actual.getProductName());
+        assertEquals(expected.getCategories(), actual.getCategories());
+        assertEquals(expected.getPid(), actual.getPid());
+        assertEquals(expected.getRetailPrice(), actual.getRetailPrice());
+        assertEquals(expected.getDiscountedPrice(), actual.getDiscountedPrice());
+        assertEquals(expected.getImageUrls(), actual.getImageUrls());
+        assertEquals(expected.isFkAdvantageProduct(), actual.isFkAdvantageProduct());
+        assertEquals(expected.getProductDescription(), actual.getProductDescription());
+        assertEquals(expected.getProductRating(), actual.getProductRating());
+        assertEquals(expected.getOverallRating(), actual.getOverallRating());
+        assertEquals(expected.getBrand(), actual.getBrand());
+        assertEquals(expected.getProductSpecifications(), actual.getProductSpecifications());
+        assertEquals(expected.getStockQuantity(), actual.getStockQuantity());
+        assertEquals(expected.getQuantityUnit(), actual.getQuantityUnit());
+        assertEquals(expected.getCreatedAt(), actual.getCreatedAt());
+
+    }
+
 }

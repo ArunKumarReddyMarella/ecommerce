@@ -11,6 +11,6 @@ public interface InvoiceService {
     Invoice getInvoiceById(String invoiceId);
     Invoice createInvoice(Invoice invoice);
     Invoice updateInvoice(Invoice invoice);
-    void patchInvoice(String invoiceId, Map<String, Object> updates);
+    Invoice patchInvoice(String invoiceId, Map<String, Object> updates);
     void deleteInvoice(String invoiceId);
 }

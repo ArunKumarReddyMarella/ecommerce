@@ -5,7 +5,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.Map;
-import java.util.Optional;
 
 public interface CartService {
     Page<Cart> getCarts(Pageable pageable);
@@ -20,5 +19,5 @@ public interface CartService {
 
     Cart updateCart(Cart updatedCart);
 
-    void patchCart(String cartId, Map<String, Object> updates);
+    Cart patchCart(String cartId, Map<String, Object> updates);
 }

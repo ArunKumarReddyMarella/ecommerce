@@ -13,10 +13,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Field;
-import java.sql.Timestamp;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -38,8 +34,7 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public Cart getCartById(String cartId) {
-        Cart cart = cartRepository.findById(cartId).orElseThrow(() -> new CartNotFoundException("Cart not found with ID: " + cartId));
-        return cart;
+        return cartRepository.findById(cartId).orElseThrow(() -> new CartNotFoundException("Cart not found with ID: " + cartId));
     }
 
     @Override
@@ -73,7 +68,7 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public void patchCart(String cartId, Map<String, Object> updates) {
+    public Cart patchCart(String cartId, Map<String, Object> updates) {
         Cart existingCart = cartRepository.findById(cartId).orElseThrow(() -> new CartNotFoundException("Cart not found with ID: " + cartId));
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule()); // for Timestamp support
@@ -84,6 +79,6 @@ public class CartServiceImpl implements CartService {
         } catch (JsonProcessingException e) {
             throw new IllegalArgumentException("Invalid update field: " + updates);
         }
-        cartRepository.save(existingCart);
+        return cartRepository.save(existingCart);
     }
 }

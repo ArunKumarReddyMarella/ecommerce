@@ -32,8 +32,7 @@ public class CardServiceImpl implements CardService {
 
     @Override
     public Card getCardById(String id) {
-        Card card = cardRepository.findById(id).orElseThrow(() -> new CardNotFondException("Card not found with id: " + id));
-        return card;
+        return cardRepository.findById(id).orElseThrow(() -> new CardNotFondException("Card not found with id: " + id));
     }
 
     @Override
@@ -86,7 +85,6 @@ public class CardServiceImpl implements CardService {
 
     @Override
     public Card getCardByCardNumber(String cardNumber) {
-        Card card = cardRepository.findByCardNumber(cardNumber).orElseThrow(() -> new CardNotFondException("Card not found with cardNumber: " + cardNumber));
-        return card;
+        return cardRepository.findByCardNumber(cardNumber).orElseThrow(() -> new CardNotFondException("Card not found with cardNumber: " + cardNumber));
     }
 }

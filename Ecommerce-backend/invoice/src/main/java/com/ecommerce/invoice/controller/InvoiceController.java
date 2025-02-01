@@ -66,8 +66,7 @@ public class InvoiceController {
         if (existingInvoice == null) {
             return ResponseEntity.notFound().build();
         }
-        invoiceService.patchInvoice(invoiceId, updates);
-        Invoice updatedInvoice = invoiceService.getInvoiceById(invoiceId);
+        Invoice updatedInvoice = invoiceService.patchInvoice(invoiceId, updates);
         return ResponseEntity.ok(updatedInvoice);
     }
 

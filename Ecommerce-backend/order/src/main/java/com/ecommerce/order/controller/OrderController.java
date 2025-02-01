@@ -58,8 +58,7 @@ public class OrderController {
 
     @PatchMapping("/{orderId}")
     public ResponseEntity<Order> patchOrder(@PathVariable String orderId, @RequestBody Map<String, Object> updates) {
-        orderService.patchOrder(orderId, updates);
-        Order updatedOrder = orderService.getOrderById(orderId);
+        Order updatedOrder = orderService.patchOrder(orderId, updates);
         return ResponseEntity.ok(updatedOrder);
     }
 

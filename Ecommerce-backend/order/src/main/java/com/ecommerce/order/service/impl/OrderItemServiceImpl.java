@@ -1,16 +1,17 @@
 package com.ecommerce.order.service.impl;
 
 import com.ecommerce.order.entity.OrderItem;
+import com.ecommerce.order.exception.OrderItemAlreadyExistsException;
 import com.ecommerce.order.repository.OrderItemRepository;
 import com.ecommerce.order.service.OrderItemService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Field;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -43,9 +44,9 @@ public class OrderItemServiceImpl implements OrderItemService {
         if(orderItem.getOrderItemId() == null)
             orderItem.setOrderItemId(UUID.randomUUID().toString());
         else {
-            Optional<OrderItem> existingOrderItem = orderItemRepository.findById(orderItem.getOrderItemId());
-            if (existingOrderItem.isPresent()) {
-                throw new RuntimeException("OrderItem with ID " + orderItem.getOrderItemId() + " already exists.");
+            boolean existingOrderItem = orderItemRepository.existsById(orderItem.getOrderItemId());
+            if (existingOrderItem) {
+                throw new OrderItemAlreadyExistsException("OrderItem with ID " + orderItem.getOrderItemId() + " already exists.");
             }
         }
         return orderItemRepository.saveAndFlush(orderItem);
@@ -62,21 +63,19 @@ public class OrderItemServiceImpl implements OrderItemService {
     }
 
     @Override
-    public void patchOrderItem(String orderItemId, Map<String, Object> updates) {
+    public OrderItem patchOrderItem(String orderItemId, Map<String, Object> updates) {
         OrderItem existingOrderItem = orderItemRepository.findById(orderItemId).orElseThrow(() -> new RuntimeException("Order Item not found"));
 
-        updates.forEach((key, value) -> {
-            try {
-                // Use reflection or property accessors to update specific fields based on the key
-                Field field = OrderItem.class.getDeclaredField(key);
-                field.setAccessible(true);
-                field.set(existingOrderItem, value);
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                // Handle potential exceptions (e.g., invalid field name)
-                throw new IllegalArgumentException("Invalid update field: " + key);
-            }
-        });
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule()); // for Timestamp support
 
-        orderItemRepository.save(existingOrderItem);
+        try {
+            // assuming updates is a Map<String, Object>
+            mapper.updateValue(existingOrderItem, updates);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid update field: " + updates);
+        }
+
+        return orderItemRepository.save(existingOrderItem);
     }
 }

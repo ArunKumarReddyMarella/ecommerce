@@ -61,9 +61,8 @@ public class OrderItemController {
         if (existingOrderItem == null) {
             return ResponseEntity.notFound().build();
         }
-        orderItemService.patchOrderItem(orderItemId, updates); // Delegate patching logic to service
-        OrderItem orderItem = orderItemService.getOrderItemById(orderItemId); // Refetch after patching
-        return ResponseEntity.ok(orderItem);
+        OrderItem patchedOrderItem = orderItemService.patchOrderItem(orderItemId, updates); // Delegate patching logic to service
+        return ResponseEntity.ok(patchedOrderItem);
     }
 
     @DeleteMapping("/{id}")

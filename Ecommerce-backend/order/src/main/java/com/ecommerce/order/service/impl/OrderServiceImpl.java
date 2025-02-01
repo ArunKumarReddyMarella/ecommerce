@@ -7,19 +7,16 @@ import com.ecommerce.order.exception.OrderNotFoundException;
 import com.ecommerce.order.repository.OrderRepository;
 import com.ecommerce.order.service.OrderItemService;
 import com.ecommerce.order.service.OrderService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Field;
-import java.sql.Timestamp;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeParseException;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -41,8 +38,7 @@ public class OrderServiceImpl implements OrderService {
     public Order getOrderById(String id) {
 //        Optional<Order> optionalOrder = orderRepository.findById(id);
 //        return optionalOrder.orElse(null);
-        Order order = orderRepository.findById(id).orElseThrow(() -> new OrderNotFoundException("Order not found with ID: " + id));
-        return order;
+        return orderRepository.findById(id).orElseThrow(() -> new OrderNotFoundException("Order not found with ID: " + id));
     }
 
     @Override
@@ -50,7 +46,7 @@ public class OrderServiceImpl implements OrderService {
         if(order.getOrderId() == null)
             order.setOrderId(UUID.randomUUID().toString());
         else {
-            Boolean existingOrder = orderRepository.existsById(order.getOrderId());
+            boolean existingOrder = orderRepository.existsById(order.getOrderId());
             if (existingOrder) {
                 throw new OrderAlreadyExistException("Order with ID " + order.getOrderId() + " already exists.");
             }
@@ -60,7 +56,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Order updateOrder(Order updatedOrder) {
-        Boolean existingOrder = orderRepository.existsById(updatedOrder.getOrderId());
+        boolean existingOrder = orderRepository.existsById(updatedOrder.getOrderId());
         if (!existingOrder) {
             throw new OrderNotFoundException("Order not found with ID: " + updatedOrder.getOrderId());
         }
@@ -68,33 +64,24 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void patchOrder(String orderId, Map<String, Object> updates) {
+    public Order patchOrder(String orderId, Map<String, Object> updates) {
         Order existingOrder = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException("Order not found with ID: " + orderId));
-        updates.forEach((key, value) -> {
-            try {
-                Field field = Order.class.getDeclaredField(key);
-                field.setAccessible(true);
-                if (field.getType() == Timestamp.class) {
-                    try {
-                        OffsetDateTime odt = OffsetDateTime.parse((String) value);
-                        Timestamp timestampValue = Timestamp.from(odt.toInstant());
-                        field.set(existingOrder, timestampValue);
-                    } catch (DateTimeParseException e) {
-                        throw new IllegalArgumentException("Invalid format for " + key + " TimeStamp field");
-                    }
-                } else {
-                    field.set(existingOrder, value);
-                }
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                throw new IllegalArgumentException("Invalid update field: " + key);
-            }
-        });
-        orderRepository.save(existingOrder);
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule()); // for Timestamp support
+
+        try {
+            // assuming updates is a Map<String, Object>
+            mapper.updateValue(existingOrder, updates);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Invalid update field: " + updates);
+        }
+        return orderRepository.save(existingOrder);
     }
 
     @Override
     public void deleteOrder(String id) {
-        Boolean existingOrder = orderRepository.existsById(id);
+        boolean existingOrder = orderRepository.existsById(id);
         if (!existingOrder) {
             throw new OrderNotFoundException("Order not found with ID: " + id);
         }

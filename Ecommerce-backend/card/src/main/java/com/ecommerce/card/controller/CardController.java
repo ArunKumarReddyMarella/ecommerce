@@ -67,8 +67,7 @@ public class CardController {
         if (existingCard == null) {
             return ResponseEntity.notFound().build();
         }
-        cardService.patchCard(cardId, updates);
-        Card updatedCard = cardService.getCardById(cardId);
+        Card updatedCard = cardService.patchCard(cardId, updates);
         return ResponseEntity.ok(updatedCard);
     }
 

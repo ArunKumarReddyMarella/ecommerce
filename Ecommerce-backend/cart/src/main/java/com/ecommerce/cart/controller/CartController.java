@@ -72,8 +72,7 @@ public class CartController {
         if (existingCart == null) {
             return ResponseEntity.notFound().build();
         }
-        cartService.patchCart(cartId, updates); // Delegate patching logic to service
-        Cart updatedCart = cartService.getCartById(cartId); // Refetch after patching
+        Cart updatedCart = cartService.patchCart(cartId, updates); // Delegate patching logic to service
         return ResponseEntity.ok(updatedCart);
     }
 

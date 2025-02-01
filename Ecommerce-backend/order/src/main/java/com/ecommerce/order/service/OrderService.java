@@ -12,7 +12,7 @@ public interface OrderService {
     Order getOrderById(String id);
     Order createOrder(Order order);
     Order updateOrder(Order updatedOrder);
-    void patchOrder(String orderId, Map<String, Object> updates);
+    Order patchOrder(String orderId, Map<String, Object> updates);
     void deleteOrder(String id);
 
 

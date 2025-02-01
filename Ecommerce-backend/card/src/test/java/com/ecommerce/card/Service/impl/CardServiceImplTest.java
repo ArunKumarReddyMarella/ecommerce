@@ -1,16 +1,16 @@
 package com.ecommerce.card.Service.impl;
 
 import com.ecommerce.card.entity.Card;
+import com.ecommerce.card.exception.CardAlreadyExistsException;
 import com.ecommerce.card.exception.CardNotFondException;
 import com.ecommerce.card.repository.CardRepository;
 import com.ecommerce.card.service.CardService;
 import com.ecommerce.card.service.impl.CardServiceImpl;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -20,16 +20,12 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 public class CardServiceImplTest {
     @Mock
     CardRepository cardRepository;
     @InjectMocks
     CardServiceImpl cardService;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
 
     private static List<Card> getCards() {
         List<Card> cardslist=new ArrayList<>();
@@ -59,8 +55,7 @@ public class CardServiceImplTest {
     private static Page<Card> getCards(Pageable pageable)
     {
         List<Card> cardslist=getCards();
-        Page<Card> expectedCards=new PageImpl<>(cardslist,pageable,cardslist.size());
-        return expectedCards;
+        return new PageImpl<>(cardslist,pageable,cardslist.size());
     }
 
     private static Card getCard() {
@@ -83,6 +78,9 @@ public class CardServiceImplTest {
         when(cardRepository.findAll(pageable)).thenReturn(expectedCards);
         Page<Card> actualCards = cardService.getCards(pageable);
         assertEquals(expectedCards, actualCards);
+        for (int i = 0; i < expectedCards.getContent().size(); i++) {
+            assertCardFields(expectedCards.getContent().get(i), actualCards.getContent().get(i));
+        }
         verify(cardRepository, times(1)).findAll(pageable);
     }
     @Test
@@ -92,6 +90,7 @@ public class CardServiceImplTest {
         when(cardRepository.findById(cardId)).thenReturn(Optional.of(expectedCard));
         Card actualCard = cardService.getCardById(cardId);
         assertEquals(expectedCard, actualCard);
+        assertCardFields(expectedCard, actualCard);
         verify(cardRepository, times(1)).findById(cardId);
     }
 
@@ -106,8 +105,9 @@ public class CardServiceImplTest {
     @Test
     void testCreateCard_Success() {
         Card card = getCard();
-        card.setCardId(null);
-        when(cardRepository.saveAndFlush(any(Card.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(cardRepository.findById(card.getCardId())).thenReturn(Optional.empty());
+//        when(cardRepository.saveAndFlush(any(Card.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(cardRepository.saveAndFlush(any(Card.class))).thenReturn(card);
         Card createdCard = cardService.createCard(card);
         assertNotNull(createdCard.getCardId());
         verify(cardRepository, times(1)).saveAndFlush(any(Card.class));
@@ -117,10 +117,20 @@ public class CardServiceImplTest {
     void testCreateNewCardSuccess() {
         Card card = getCard();
         card.setCardId(null);
-        when(cardRepository.saveAndFlush(any(Card.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(cardRepository.saveAndFlush(any(Card.class))).thenReturn(card);
         Card createdCard = cardService.createCard(card);
         assertNotNull(createdCard.getCardId());
         verify(cardRepository, times(1)).saveAndFlush(any(Card.class));
+    }
+
+    // test for card already exists exception
+    @Test
+    void testCreateCard_CardAlreadyExists() {
+        Card card = getCard();
+        when(cardRepository.findById(card.getCardId())).thenReturn(Optional.of(card));
+        assertThrows(CardAlreadyExistsException.class, () -> cardService.createCard(card));
+        verify(cardRepository, times(1)).findById(card.getCardId());
+        verify(cardRepository, never()).saveAndFlush(any(Card.class));
     }
 
     @Test
@@ -129,9 +139,10 @@ public class CardServiceImplTest {
         Card updatedCard = getCard();
         updatedCard.setCardId(cardId);
         when(cardRepository.existsById(cardId)).thenReturn(true);
-        when(cardRepository.saveAndFlush(any(Card.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(cardRepository.saveAndFlush(any(Card.class))).thenReturn(updatedCard);
         Card savedCard = cardService.updateCard(updatedCard);
         assertEquals(cardId, savedCard.getCardId());
+        assertCardFields(savedCard, updatedCard);
         verify(cardRepository, times(1)).existsById(cardId);
         verify(cardRepository, times(1)).saveAndFlush(any(Card.class));
     }
@@ -162,8 +173,18 @@ public class CardServiceImplTest {
     void testPatchCard_Failure() {
         String cardId = "1";
         Card existingCard = getCard();
+        Map<String, Object> updates = Map.of("invalidField", "Invalid Name");
+        when(cardRepository.findById(cardId)).thenReturn(Optional.of(existingCard));
+        assertThrows(IllegalArgumentException.class, () -> cardService.patchCard(cardId, updates));
+        verify(cardRepository, times(1)).findById(cardId);
+        verify(cardRepository, never()).save(any(Card.class));
+    }
+
+    @Test
+    void testPatchCard_CardNotFondException() {
+        String cardId = "1";
         Map<String, Object> updates = Map.of("cardHolderName", "Updated Name");
-        when(cardRepository.existsById(cardId)).thenReturn(false);
+        when(cardRepository.findById(cardId)).thenThrow(new CardNotFondException("Card not found"));
         assertThrows(CardNotFondException.class, () -> cardService.patchCard(cardId, updates));
         verify(cardRepository, times(1)).findById(cardId);
         verify(cardRepository, never()).save(any(Card.class));
@@ -176,6 +197,7 @@ public class CardServiceImplTest {
         when(cardRepository.findByCardNumber(cardNumber)).thenReturn(Optional.of(expectedCard));
         Card actualCard = cardService.getCardByCardNumber(cardNumber);
         assertEquals(expectedCard, actualCard);
+        assertCardFields(expectedCard, actualCard);
         verify(cardRepository, times(1)).findByCardNumber(cardNumber);
     }
 
@@ -203,5 +225,15 @@ public class CardServiceImplTest {
         when(cardRepository.existsById(cardId)).thenReturn(false);
         assertThrows(CardNotFondException.class, () -> cardService.deleteCard(cardId));
         verify(cardRepository, times(1)).existsById(cardId);
+    }
+
+    private void assertCardFields(Card actualCard, Card expectedCard) {
+        assertEquals(actualCard.getCardId(),expectedCard.getCardId());
+        assertEquals(actualCard.getCardNumber(),expectedCard.getCardNumber());
+        assertEquals(actualCard.getCardHolderName(),expectedCard.getCardHolderName());
+        assertEquals(actualCard.getCardType(),expectedCard.getCardType());
+        assertEquals(actualCard.getCvv(),expectedCard.getCvv());
+        assertEquals(actualCard.getUserId(),expectedCard.getUserId());
+        assertEquals(actualCard.getCreatedAt(),expectedCard.getCreatedAt());
     }
 }

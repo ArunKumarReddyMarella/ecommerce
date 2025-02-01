@@ -14,11 +14,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Field;
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -37,8 +32,7 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Override
     public Invoice getInvoiceById(String invoiceId) {
-        Invoice optionalInvoice = invoiceRepository.findById(invoiceId).orElseThrow(() -> new InvoiceNotFoundException("Invoice not found with ID: " + invoiceId));
-        return optionalInvoice;
+        return invoiceRepository.findById(invoiceId).orElseThrow(() -> new InvoiceNotFoundException("Invoice not found with ID: " + invoiceId));
     }
 
     @Override
@@ -63,7 +57,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     @Override
-    public void patchInvoice(String invoiceId, Map<String, Object> updates) {
+    public Invoice patchInvoice(String invoiceId, Map<String, Object> updates) {
         Invoice existingInvoice = invoiceRepository.findById(invoiceId)
                 .orElseThrow(() -> new InvoiceNotFoundException("Invoice not found with ID: " + invoiceId));
 
@@ -76,7 +70,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         } catch (JsonProcessingException e) {
             throw new IllegalArgumentException("Invalid update field: " + updates);
         }
-        invoiceRepository.save(existingInvoice);
+        return invoiceRepository.save(existingInvoice);
     }
 
     @Override
