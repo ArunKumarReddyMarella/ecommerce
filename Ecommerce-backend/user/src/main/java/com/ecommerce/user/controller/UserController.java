@@ -79,22 +79,4 @@ public class UserController {
         userService.deleteUser(userId);
         return ResponseEntity.ok("User deleted successfully!");
     }
-
-
-    // get ordered products by the user
-    @GetMapping("/{userId}/orderedProducts")
-    public ResponseEntity<Page<OrderedProduct>> getProducts(
-            @PathVariable String userId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "asc") String sortDirection) {
-
-//        Sort sort = Sort.by(sortDirection.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, "username"); // Sort by username by default
-//        Pageable pageable = PageRequest.of(page, size, sort);
-
-        Pageable pageable = PageRequest.of(page, size);
-
-        Page<OrderedProduct> orderedProducts = userService.getOrderedProducts(userId, pageable);
-        return ResponseEntity.ok(orderedProducts);
-    }
 }

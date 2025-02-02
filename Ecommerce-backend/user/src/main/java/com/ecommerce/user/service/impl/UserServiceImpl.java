@@ -106,17 +106,4 @@ public class UserServiceImpl implements UserService {
         userRepository.save(existingUser);
     }
 
-    @Override
-    public Page<OrderedProduct> getOrderedProducts(String userId, Pageable pageable) {
-        var orderedItems = orderService.getOrderItemsByUserId(userId, pageable);
-        List<OrderedProduct> orderedProducts = orderedItems.getContent().stream().map(orderItem -> {
-           var OrderedProduct = new OrderedProduct();
-           OrderedProduct.setProductId(orderItem.getProductId());
-           OrderedProduct.setQuantity(orderItem.getQuantity());
-           OrderedProduct.setTotalPrice(orderItem.getPrice());
-           return OrderedProduct;
-        }).collect(Collectors.toList());
-
-        return new PageImpl<>(orderedProducts, pageable, orderedItems.getTotalElements());
-    }
 }

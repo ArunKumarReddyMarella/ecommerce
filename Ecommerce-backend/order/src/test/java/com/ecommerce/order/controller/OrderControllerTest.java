@@ -97,6 +97,27 @@ class OrderControllerTest {
     }
 
     @Test
+    void testGetOrders_ascending() {
+        int page = 0;
+        int size = 10;
+        String sortDirection = "asc";
+        Sort sort = Sort.by(Sort.Direction.ASC, "orderDate");
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<Order> expectedOrders = createTestOrderPage(pageable);
+
+        when(orderService.getOrders(pageable)).thenReturn(expectedOrders);
+
+        ResponseEntity<Page<Order>> response = orderController.getOrders(page, size, sortDirection);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(expectedOrders, response.getBody());
+        for(int i = 0; i < expectedOrders.getContent().size(); i++) {
+            assertOrderFields(expectedOrders.getContent().get(i), response.getBody().getContent().get(i));
+        }
+        verify(orderService, times(1)).getOrders(pageable);
+    }
+
+    @Test
     void testGetOrderById_Success() {
         String orderId = "ORD-001";
         Order expectedOrder = createTestOrder();
@@ -173,6 +194,28 @@ class OrderControllerTest {
         int size = 10;
         String sortDirection = "desc";
         Sort sort = Sort.by(Sort.Direction.DESC, "price");
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<OrderItem> expectedOrderItems = createTestOrderItemPage(pageable);
+
+        when(orderItemService.getOrderItemsByOrderId(orderId, pageable)).thenReturn(expectedOrderItems);
+
+        ResponseEntity<Page<OrderItem>> response = orderController.getOrderItems(orderId, page, size, sortDirection);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(expectedOrderItems, response.getBody());
+        for(int i = 0; i < expectedOrderItems.getContent().size(); i++) {
+            assertOrderItemFields(expectedOrderItems.getContent().get(i), response.getBody().getContent().get(i));
+        }
+        verify(orderItemService, times(1)).getOrderItemsByOrderId(orderId, pageable);
+    }
+
+    @Test
+    void testGetOrderItems_ascending() {
+        String orderId = "ORD-001";
+        int page = 0;
+        int size = 10;
+        String sortDirection = "asc";
+        Sort sort = Sort.by(Sort.Direction.ASC, "price");
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<OrderItem> expectedOrderItems = createTestOrderItemPage(pageable);
 

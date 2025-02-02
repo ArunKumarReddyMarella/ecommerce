@@ -36,8 +36,7 @@ public class CountryServiceImpl implements CountryService {
 
     @Override
     public Country getCountryById(String id) {
-        Country optionalCountry = countryRepository.findById(id).orElseThrow(() -> new CountryNotFoundException("Country not found with ID: " + id));
-        return optionalCountry;
+        return countryRepository.findById(id).orElseThrow(() -> new CountryNotFoundException("Country not found with ID: " + id));
     }
 
     @Override

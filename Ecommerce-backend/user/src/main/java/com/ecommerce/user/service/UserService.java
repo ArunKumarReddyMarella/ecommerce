@@ -21,6 +21,4 @@ public interface UserService {
     User updateUser(User updatedUser);
 
     void patchUser(String userId, Map<String, Object> updates);
-
-    Page<OrderedProduct> getOrderedProducts(String userId, Pageable pageable);
 }
