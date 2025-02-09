@@ -14,10 +14,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Field;
-import java.sql.Timestamp;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -36,8 +32,7 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public Address getAddressById(String id) {
-        Address optionalAddress = addressRepository.findById(id).orElseThrow(() -> new AddressNotFoundException("Address not found with ID: " + id));
-        return optionalAddress;
+        return addressRepository.findById(id).orElseThrow(() -> new AddressNotFoundException("Address not found with ID: " + id));
     }
 
     @Override
@@ -55,12 +50,10 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public Address updateAddress(Address address) {
-        if(!address.getAddressId().isEmpty()) {
             Optional<Address> existingAddress = addressRepository.findById(address.getAddressId());
             if (existingAddress.isEmpty()) {
                 throw new AddressNotFoundException("Address not found with ID: " + address.getAddressId());
             }
-        }
         return addressRepository.saveAndFlush(address);
     }
 
