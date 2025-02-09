@@ -15,10 +15,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Field;
-import java.sql.Timestamp;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -38,8 +34,7 @@ public class CityServiceImpl implements CityService {
 
     @Override
     public City getCityById(String id) {
-        City optionalCity = cityRepository.findById(id).orElseThrow(() -> new CityNotFoundException("City not found"));
-        return optionalCity;
+        return cityRepository.findById(id).orElseThrow(() -> new CityNotFoundException("City not found"));
     }
 
     @Override
