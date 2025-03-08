@@ -22,7 +22,8 @@ def parse_product_data(product):
     crawl_timestamp = datetime.strptime(product.get('crawl_timestamp'), "%Y-%m-%d %H:%M:%S %z")
     product_url = product.get('product_url')
     product_name = product.get('product_name')
-    product_category_tree = product.get('product_category_tree')
+    # product_category_tree = product.get('product_category_tree')
+    product_category_tree = str(product.get('product_category_tree')).replace('[\"', '').replace('\"]','')
     pid = product.get('pid')
 
     retail_price_str = product.get('retail_price')
@@ -30,9 +31,9 @@ def parse_product_data(product):
 
     discounted_price_str = product.get('discounted_price')
     discounted_price = float(discounted_price_str) if discounted_price_str else 0
-
     images = product.get('image')
     image = json.dumps(json.loads(images)) if images else "[]"
+    image = image.replace('\"','')
 
     is_FK_Advantage_product = product.get('is_FK_Advantage_product') == "TRUE"
     description = product.get('description')

@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -86,5 +87,14 @@ public class CardServiceImpl implements CardService {
     @Override
     public Card getCardByCardNumber(String cardNumber) {
         return cardRepository.findByCardNumber(cardNumber).orElseThrow(() -> new CardNotFondException("Card not found with cardNumber: " + cardNumber));
+    }
+
+    @Override
+    public List<Card> getCardByUserId(String userId) {
+        List<Card> cards = cardRepository.findByUserId(userId);
+        if (cards.isEmpty()) {
+            throw new CardNotFondException("Cards not found with userId: " + userId);
+        }
+        return cards;
     }
 }

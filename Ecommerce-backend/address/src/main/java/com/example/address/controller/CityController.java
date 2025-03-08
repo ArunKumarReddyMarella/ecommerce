@@ -8,11 +8,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/cities")
+@RequestMapping("/api/v1/cities")
 public class CityController {
 
     private final CityService cityService;
@@ -33,6 +34,14 @@ public class CityController {
         City city = cityService.getCityById(id);
         return ResponseEntity.ok(city);
     }
+
+    // get all cities by country id
+    @GetMapping("/country/{id}")
+    public ResponseEntity<Collection<City>> getCitiesByCountryId(@PathVariable String id) {
+        Collection<City> cities = cityService.getCitiesByCountryId(id);
+        return ResponseEntity.ok(cities);
+    }
+
 
     @PostMapping
     public ResponseEntity<City> createCity(@RequestBody City city) {

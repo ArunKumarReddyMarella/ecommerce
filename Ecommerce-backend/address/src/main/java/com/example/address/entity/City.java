@@ -35,7 +35,7 @@ public class City {
     private Country country;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "city", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "city", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ToString.Exclude // Cascade all operations to addresses
     private List<Address> addresses;
 }

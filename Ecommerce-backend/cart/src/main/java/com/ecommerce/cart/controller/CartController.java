@@ -13,10 +13,11 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/carts")
+@RequestMapping("/api/v1/carts")
 public class CartController {
 
     private final CartService cartService;
@@ -44,10 +45,10 @@ public class CartController {
         return ResponseEntity.ok(cart);
     }
 
-    @GetMapping("/userId/{userId}")  // Assuming user ID identifies a user's cart
-    public ResponseEntity<Cart> getCartByUserId(@PathVariable String userId){
-        Cart cart = cartService.getCartByUserId(userId);
-        return ResponseEntity.ok(cart);
+    @GetMapping("/user/{userId}")  // Assuming user ID identifies a user's cart
+    public ResponseEntity<List<Cart>> getCartByUserId(@PathVariable String userId){
+        List<Cart> carts = cartService.getCartByUserId(userId);
+        return ResponseEntity.ok(carts);
     }
 
     @PostMapping

@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/wishlists")
+@RequestMapping("/api/v1/wishlists")
 public class WishlistController {
 
     private final WishlistService wishlistService;
@@ -25,9 +25,10 @@ public class WishlistController {
     public ResponseEntity<Page<Wishlist>> getWishlists(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "desc") String sortDirection) {
+            @RequestParam(defaultValue = "desc") String sortDirection,
+            @RequestParam(defaultValue = "createdAt") String sortBy) {
 
-        Sort sort = Sort.by(sortDirection.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, "createdAt");
+        Sort sort = Sort.by(sortDirection.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
 
         Page<Wishlist> wishlists = wishlistService.getWishlists(pageable);
@@ -38,6 +39,19 @@ public class WishlistController {
     public ResponseEntity<Wishlist> getWishlistById(@PathVariable String id){
         Wishlist wishlist = wishlistService.getWishlistById(id);
         return ResponseEntity.ok(wishlist);
+    }
+
+    // get wishlist by user id
+    @GetMapping("user/{userId}")
+    public ResponseEntity<Page<Wishlist>> getWishlistByUserId(@PathVariable String userId,
+                                                              @RequestParam(defaultValue = "0") int page,
+                                                              @RequestParam(defaultValue = "10") int size,
+                                                              @RequestParam(defaultValue = "desc") String sortDirection,
+                                                              @RequestParam(defaultValue = "createdAt") String sortBy) {
+        Sort sort = Sort.by(sortDirection.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<Wishlist> wishlists = wishlistService.getWishlistByUserId(userId, pageable);
+        return ResponseEntity.ok(wishlists);
     }
 
     @PostMapping

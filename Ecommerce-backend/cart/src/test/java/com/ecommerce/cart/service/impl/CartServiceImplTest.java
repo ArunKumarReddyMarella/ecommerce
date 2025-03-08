@@ -99,18 +99,22 @@ class CartServiceImplTest {
     void testGetCartByUserId_ExistingUserId() {
         String userId = "user1";
         Cart cart = getCart();
-        when(cartRepository.findByUserId(userId)).thenReturn(Optional.of(cart));
+        List<Cart> expectedCarts = List.of(cart);
+        when(cartRepository.findByUserId(userId)).thenReturn(List.of(cart));
 
-        Cart actualCart = cartService.getCartByUserId(userId);
+        List<Cart> actualCarts = cartService.getCartByUserId(userId);
 
-        assertCartFields(cart, actualCart);
+        for (int i = 0; i < actualCarts.size(); i++) {
+            assertCartFields(expectedCarts.get(i), actualCarts.get(i));
+        }
         verify(cartRepository, times(1)).findByUserId(userId);
     }
 
     @Test
     void testGetCartByUserId_NonexistentUserId() {
         String userId = "nonExistingUser";
-        when(cartRepository.findByUserId(userId)).thenReturn(Optional.empty());
+        List<Cart> expectedCarts = List.of();
+        when(cartRepository.findByUserId(userId)).thenReturn(expectedCarts);
 
         assertThrows(CartNotFoundException.class, () -> cartService.getCartByUserId(userId));
 

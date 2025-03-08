@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -38,8 +39,12 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public Cart getCartByUserId(String userId) {
-        return cartRepository.findByUserId(userId).orElseThrow(() -> new CartNotFoundException("Cart not found for user ID: " + userId));
+    public List<Cart> getCartByUserId(String userId) {
+        List<Cart> cartList = cartRepository.findByUserId(userId);
+        if (cartList.isEmpty()) {
+            throw new CartNotFoundException("Cart not found for user ID: " + userId);
+        }
+        return cartList;
     }
 
     @Override

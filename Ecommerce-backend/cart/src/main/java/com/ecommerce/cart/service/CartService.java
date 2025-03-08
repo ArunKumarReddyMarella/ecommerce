@@ -4,6 +4,7 @@ import com.ecommerce.cart.entity.Cart;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Map;
 
 public interface CartService {
@@ -11,7 +12,7 @@ public interface CartService {
 
     Cart getCartById(String cartId);
 
-    Cart getCartByUserId(String userId);
+    List<Cart> getCartByUserId(String userId);
 
     Cart createCart(Cart cart);
 

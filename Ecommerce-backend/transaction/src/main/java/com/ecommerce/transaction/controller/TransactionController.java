@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/transactions")
+@RequestMapping("/api/v1/transactions")
 public class TransactionController {
 
     private final TransactionService transactionService;
@@ -29,9 +29,10 @@ public class TransactionController {
     public ResponseEntity<Page<Transaction>> getTransactions(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "desc") String sortDirection) {
+            @RequestParam(defaultValue = "desc") String sortDirection,
+            @RequestParam(defaultValue = "transactionDate") String sortBy) {
 
-        Sort sort = Sort.by(sortDirection.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, "transactionDate");
+        Sort sort = Sort.by(sortDirection.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
 
         Page<Transaction> transactions = transactionService.getTransactions(pageable);
@@ -41,6 +42,12 @@ public class TransactionController {
     @GetMapping("/{transactionId}")
     public ResponseEntity<Transaction> getTransactionById(@PathVariable String transactionId) {
         Transaction transaction = transactionService.getTransactionById(transactionId);
+        return ResponseEntity.ok(transaction);
+    }
+
+    @GetMapping("/order/{orderId}")
+    public ResponseEntity<Transaction> getTransactionsByOrderId(@PathVariable String orderId) {
+        Transaction transaction = transactionService.getTransactionsByOrderId(orderId);
         return ResponseEntity.ok(transaction);
     }
 

@@ -13,4 +13,6 @@ public interface RatingService {
     Rating updateRating(Rating rating);
     void patchRating(String ratingId, Map<String, Object> updates);
     void deleteRating(String ratingId);
+
+    Page<Rating> getRatingsByProductId(String productId, Pageable pageable);
 }

@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.Map;
+import java.util.Optional;
 
 public interface InvoiceService {
     Page<Invoice> getInvoices(Pageable pageable);
@@ -13,4 +14,6 @@ public interface InvoiceService {
     Invoice updateInvoice(Invoice invoice);
     Invoice patchInvoice(String invoiceId, Map<String, Object> updates);
     void deleteInvoice(String invoiceId);
+
+    Invoice getInvoiceByTransactionId(String transactionId);
 }

@@ -13,4 +13,6 @@ public interface TransactionService {
     Transaction updateTransaction(Transaction transaction);
     void patchTransaction(String transactionId, Map<String, Object> updates);
     void deleteTransaction(String transactionId);
+
+    Transaction getTransactionsByOrderId(String orderId);
 }

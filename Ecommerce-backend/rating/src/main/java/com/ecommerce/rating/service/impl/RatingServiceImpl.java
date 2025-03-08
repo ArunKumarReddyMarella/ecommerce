@@ -36,8 +36,7 @@ public class RatingServiceImpl implements RatingService {
 
     @Override
     public Rating getRatingById(String ratingId) {
-        Rating optionalRating = ratingRepository.findById(ratingId).orElseThrow(() -> new RatingNotFoundException("Rating not found with ID: " + ratingId));
-        return optionalRating;
+        return ratingRepository.findById(ratingId).orElseThrow(() -> new RatingNotFoundException("Rating not found with ID: " + ratingId));
     }
 
     @Override
@@ -82,5 +81,14 @@ public class RatingServiceImpl implements RatingService {
         if(!ratingRepository.existsById(ratingId))
             throw new RatingNotFoundException("Rating not found with ID: " + ratingId);
         ratingRepository.deleteById(ratingId);
+    }
+
+    @Override
+    public Page<Rating> getRatingsByProductId(String productId, Pageable pageable) {
+        if(productId == null)
+            throw new IllegalArgumentException("Product ID cannot be null");
+//        if(!ratingRepository.existsByProductId(productId))
+//            throw new RatingNotFoundException("No ratings found for product ID: " + productId);
+        return ratingRepository.findByProductId(productId, pageable);
     }
 }

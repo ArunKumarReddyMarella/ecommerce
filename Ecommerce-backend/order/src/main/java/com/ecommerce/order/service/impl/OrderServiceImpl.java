@@ -1,9 +1,11 @@
 package com.ecommerce.order.service.impl;
 
+import com.ecommerce.order.dto.OrderDataDto;
 import com.ecommerce.order.entity.Order;
 import com.ecommerce.order.entity.OrderItem;
 import com.ecommerce.order.exception.OrderAlreadyExistException;
 import com.ecommerce.order.exception.OrderNotFoundException;
+import com.ecommerce.order.mapper.OrderDataMapper;
 import com.ecommerce.order.repository.OrderRepository;
 import com.ecommerce.order.service.OrderItemService;
 import com.ecommerce.order.service.OrderService;
@@ -16,8 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @Transactional
@@ -29,6 +30,9 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private OrderItemService orderItemService;
 
+    @Autowired
+    private OrderDataMapper orderDataMapper;
+
     @Override
     public Page<Order> getOrders(Pageable pageable) {
         return orderRepository.findAll(pageable);
@@ -36,9 +40,31 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Order getOrderById(String id) {
-//        Optional<Order> optionalOrder = orderRepository.findById(id);
-//        return optionalOrder.orElse(null);
         return orderRepository.findById(id).orElseThrow(() -> new OrderNotFoundException("Order not found with ID: " + id));
+    }
+
+    /*Eager Loading in OrderService: You might encounter the N+1 problem in the getOrderDataByUserId
+    @Query("SELECT o FROM Order o JOIN FETCH o.orderItems WHERE o.userId = :userId")
+    List<Order> findOrdersWithOrderItemsByUserId(@Param("userId") String userId);*/
+
+
+    @Override
+    public List<OrderDataDto> getOrderDataByUserId(String userId) {
+        List<OrderDataDto> orderDataDtos = new ArrayList<>();
+        List<String> orderIds = orderRepository.findOrderIdsByUserId(userId);
+
+//        for(String orderId : orderIds) {
+//            Optional<Order> optionalOrder = orderRepository.findById(orderId);
+//            if(optionalOrder.isPresent()) {
+//                List<OrderItem> orderItems = orderItemService.getOrderItemsByOrderId(orderId, Pageable.unpaged()).getContent();
+//                orderDataDtos.add(orderDataMapper.toOrderDataDtos(optionalOrder.get(), orderItems));
+//            }
+//        }
+//        return orderDataDtos;
+
+        List<Order> orders = orderRepository.findAllById(orderIds);
+        orders.forEach(order -> orderDataDtos.add(orderDataMapper.toOrderDataDtos(order, orderItemService.getOrderItemsByOrderId(order.getOrderId(), Pageable.unpaged()).getContent())));
+        return orderDataDtos;
     }
 
     @Override
@@ -88,9 +114,4 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.deleteById(id);
     }
 
-    @Override
-    public Page<OrderItem> getOrderItemsByUserId(String userId, Pageable pageable) {
-        String orderId = orderRepository.findOrderIdByUserId(userId);
-        return orderItemService.getOrderItemsByOrderId(orderId, pageable);
-    }
 }

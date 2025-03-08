@@ -2,10 +2,12 @@ package com.example.address.service.impl;
 
 import com.example.address.entity.Address;
 import com.example.address.entity.City;
+import com.example.address.entity.Country;
 import com.example.address.exception.CityAlreadyExistsException;
 import com.example.address.exception.CityNotFoundException;
 import com.example.address.repository.CityRepository;
 import com.example.address.service.CityService;
+import com.example.address.service.CountryService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -15,10 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @Transactional
@@ -26,6 +25,9 @@ public class CityServiceImpl implements CityService {
 
     @Autowired
     private CityRepository cityRepository;
+
+    @Autowired
+    private CountryService countryService;
 
     @Override
     public Page<City> getCities(Pageable pageable) {
@@ -87,6 +89,12 @@ public class CityServiceImpl implements CityService {
         City optionalCity = cityRepository.findById(id).orElseThrow(() -> new CityNotFoundException("City not found with ID " + id));
         return optionalCity.getAddresses();
     }
-    
+
+    @Override
+    public Collection<City> getCitiesByCountryId(String id) {
+        Country country = countryService.getCountryById(id);
+        return country.getCities();
+    }
+
 }
 

@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/products")
+@RequestMapping("/api/v1/products")
 public class ProductController {
 
     private static final Logger logger = LoggerFactory.getLogger(ProductController.class);
@@ -32,9 +32,10 @@ public class ProductController {
     @GetMapping
     public ResponseEntity<Page<Product>> getProducts(@RequestParam(defaultValue = "0") int page,  // Default to page 0
                                                      @RequestParam(defaultValue = "10") int size, // Default to 10 items per page
-                                                     @RequestParam(defaultValue = "desc") String sortDirection) {
+                                                     @RequestParam(defaultValue = "desc") String sortDirection,
+                                                     @RequestParam(defaultValue = "retailPrice") String sortProperty) {
         logger.debug("Fetching products with page: {}, size: {}, sortDirection: {}", page, size, sortDirection);
-        Sort sort = Sort.by(sortDirection.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, "retailPrice"); // Example: sorting by productName
+        Sort sort = Sort.by(sortDirection.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, sortProperty); // Example: sorting by productName
         Pageable pageable = PageRequest.of(page, size, sort);
 
         Page<Product> products = productService.getProducts(pageable);

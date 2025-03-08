@@ -14,4 +14,6 @@ public interface WishlistService {
     void deleteWishlist(String id);
 
     Wishlist updateWishlist(Wishlist updatedWishlist);
+
+    Page<Wishlist> getWishlistByUserId(String userId, Pageable pageable);
 }

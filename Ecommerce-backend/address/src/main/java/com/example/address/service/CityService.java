@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -18,5 +19,7 @@ public interface CityService {
     void patchCity(String id, Map<String, Object> updates);
     void deleteCity(String id);
     List<Address> getCityAddresses(String id);
+
+    Collection<City> getCitiesByCountryId(String id);
 }
 

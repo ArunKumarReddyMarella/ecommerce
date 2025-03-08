@@ -64,4 +64,9 @@ public class WishlistServiceImpl implements WishlistService {
         return wishlistRepository.saveAndFlush(updatedWishlist);
     }
 
+    @Override
+    public Page<Wishlist> getWishlistByUserId(String userId, Pageable pageable) {
+        return wishlistRepository.findByUserId(userId, pageable);
+    }
+
 }

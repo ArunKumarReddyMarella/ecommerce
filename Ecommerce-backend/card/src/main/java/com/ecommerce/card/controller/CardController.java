@@ -9,10 +9,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/cards")
+@RequestMapping("/api/v1/cards")
 public class CardController {
 
     private final CardService cardService;
@@ -38,6 +39,12 @@ public class CardController {
     public ResponseEntity<Card> getCardById(@PathVariable String id){
         Card card = cardService.getCardById(id);
         return ResponseEntity.ok(card);
+    }
+
+    @GetMapping("userId/{userId}")
+    public ResponseEntity<List<Card>> getCardByUserId(@PathVariable String userId){
+        List<Card> cards = cardService.getCardByUserId(userId);
+        return ResponseEntity.ok(cards);
     }
 
     @GetMapping("cardNumber") // Assuming you want to fetch by card number

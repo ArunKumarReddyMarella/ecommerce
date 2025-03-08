@@ -37,8 +37,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Transaction getTransactionById(String transactionId) {
-        Transaction optionalTransaction = transactionRepository.findById(transactionId).orElseThrow(() -> new TransactionNotFoundException("Transaction not found with ID: " + transactionId));
-        return optionalTransaction;
+        return transactionRepository.findById(transactionId).orElseThrow(() -> new TransactionNotFoundException("Transaction not found with ID: " + transactionId));
     }
 
     @Override
@@ -85,5 +84,11 @@ public class TransactionServiceImpl implements TransactionService {
     public void deleteTransaction(String transactionId) {
         if(!transactionRepository.existsById(transactionId)) throw new TransactionNotFoundException("Transaction not found with ID: " + transactionId);
         transactionRepository.deleteById(transactionId);
+    }
+
+    @Override
+    public Transaction getTransactionsByOrderId(String orderId) {
+        return transactionRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new TransactionNotFoundException("Transaction not found with Order ID: " + orderId));
     }
 }

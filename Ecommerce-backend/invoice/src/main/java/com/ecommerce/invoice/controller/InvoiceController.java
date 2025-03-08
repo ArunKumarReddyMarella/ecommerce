@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/invoices")
+@RequestMapping("/api/v1/invoices")
 public class InvoiceController {
 
     private final InvoiceService invoiceService;
@@ -41,6 +41,12 @@ public class InvoiceController {
     @GetMapping("/{invoiceId}")
     public ResponseEntity<Invoice> getInvoiceById(@PathVariable String invoiceId) {
         Invoice invoice = invoiceService.getInvoiceById(invoiceId);
+        return ResponseEntity.ok(invoice);
+    }
+
+    @GetMapping("/transaction/{transactionId}")
+    public ResponseEntity<Invoice> getInvoiceByTransactionId(@PathVariable String transactionId) {
+        Invoice invoice = invoiceService.getInvoiceByTransactionId(transactionId);
         return ResponseEntity.ok(invoice);
     }
 

@@ -1,5 +1,6 @@
 package com.ecommerce.order.controller;
 
+import com.ecommerce.order.dto.OrderDataDto;
 import com.ecommerce.order.entity.Order;
 import com.ecommerce.order.entity.OrderItem;
 import com.ecommerce.order.service.OrderItemService;
@@ -12,10 +13,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/orders")
+@RequestMapping("/api/v1/orders")
 public class OrderController {
 
     private final OrderService orderService;
@@ -80,4 +82,10 @@ public class OrderController {
         Page<OrderItem> orderItems = orderItemService.getOrderItemsByOrderId(orderId, pageable);
         return ResponseEntity.ok(orderItems);
     }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<OrderDataDto>> getUserOrders(@PathVariable String userId){
+        return ResponseEntity.ok(orderService.getOrderDataByUserId(userId));
+    }
+
 }

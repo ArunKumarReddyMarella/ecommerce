@@ -80,4 +80,9 @@ public class InvoiceServiceImpl implements InvoiceService {
         }
             invoiceRepository.deleteById(invoiceId);
     }
+
+    @Override
+    public Invoice getInvoiceByTransactionId(String transactionId) {
+        return invoiceRepository.findByTransactionId(transactionId).orElseThrow(() -> new InvoiceNotFoundException("Invoice not found with transaction ID: " + transactionId));
+    }
 }

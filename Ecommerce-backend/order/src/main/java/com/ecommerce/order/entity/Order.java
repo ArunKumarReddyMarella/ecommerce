@@ -36,7 +36,11 @@ public class Order {
     @DecimalMin(value = "0.0", inclusive = false, message = "Total amount must be greater than zero")
     private BigDecimal totalAmount;
 
+//    @Column(nullable = false)
+//    @NotBlank(message = "Status cannot be blank")
+//    private String status;
+
     @Column(nullable = false)
-    @NotBlank(message = "Status cannot be blank")
-    private String status;
+    @Enumerated(EnumType.STRING) // Store enum values as strings in DB
+    private OrderStatus status;
 }

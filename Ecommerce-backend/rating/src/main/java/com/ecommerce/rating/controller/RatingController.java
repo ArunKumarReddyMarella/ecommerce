@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/ratings")
+@RequestMapping("/api/v1/ratings")
 public class RatingController {
 
     private final RatingService ratingService;
@@ -42,6 +42,20 @@ public class RatingController {
     public ResponseEntity<Rating> getRatingById(@PathVariable String ratingId) {
         Rating rating = ratingService.getRatingById(ratingId);
         return ResponseEntity.ok(rating);
+    }
+
+    // get ratings by product id
+    @GetMapping("/product/{productId}")
+    public ResponseEntity<Page<Rating>> getRatingsByProductId(@PathVariable String productId,
+                                                              @RequestParam(defaultValue = "0") int page,
+                                                              @RequestParam(defaultValue = "10") int size,
+                                                              @RequestParam(defaultValue = "desc") String sortDirection,
+                                                              @RequestParam(defaultValue = "createdAt") String sortBy) {
+
+        Sort sort = Sort.by(sortDirection.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<Rating> ratings = ratingService.getRatingsByProductId(productId, pageable);
+        return ResponseEntity.ok(ratings);
     }
 
     @PostMapping
