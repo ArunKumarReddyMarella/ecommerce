@@ -8,6 +8,8 @@ import com.ecommerce.product.Service.ProductService;
 import com.ecommerce.product.exception.ProductAlreadyExistsException;
 import com.ecommerce.product.exception.ProductNotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.transaction.Transactional;
@@ -18,9 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @Transactional
@@ -44,6 +44,22 @@ public class ProductServiceImpl implements ProductService {
     public Product getProductById(String Id) {
         logger.debug("Fetching product with ID: {}", Id);
         Product product = productRepository.findById(Id).orElseThrow(() -> new ProductNotFoundException("Product with ID " + Id + " not found"));
+        // how to fetch json string from category?
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            String categoriesString = product.getCategories();
+            String imageUrlString = product.getImageUrls(); // Returns "[url1, url2, ...]"
+            JsonNode productSpecifications = objectMapper.readTree(product.getProductSpecifications());
+            String[] categoriesArray = product.getCategories().split(",");
+            imageUrlString = imageUrlString.substring(1, imageUrlString.length() - 1); // Remove brackets
+            List<String> imageUrlList = Arrays.asList(imageUrlString.split(", ")); // Split and convert
+
+            JsonNode productDetails = objectMapper.readTree(product.getProductSpecifications());
+
+            logger.debug("Product fetched: {}", product);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
         logger.debug("Product fetched: {}", product);
         return product;
     }

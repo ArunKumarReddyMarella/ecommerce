@@ -34,12 +34,13 @@ public class WishlistControllerTest {
         int page = 0;
         int size = 10;
         String sortDirection = "desc";
-        Sort sort = Sort.by(sortDirection.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, "createdAt");
+        String sortField = "createdAt";
+        Sort sort = Sort.by(Sort.Direction.DESC, sortField);
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<Wishlist> expectedWishlists = getWishlists(pageable);
         when(wishlistService.getWishlists(pageable)).thenReturn(expectedWishlists);
 
-        ResponseEntity<Page<Wishlist>> response = wishlistController.getWishlists(page, size, sortDirection);
+        ResponseEntity<Page<Wishlist>> response = wishlistController.getWishlists(page, size, sortDirection, sortField);
 
         assertEquals(expectedWishlists, response.getBody());
         verify(wishlistService, times(1)).getWishlists(pageable);
@@ -51,12 +52,13 @@ public class WishlistControllerTest {
         int page = 0;
         int size = 10;
         String sortDirection = "asc";
-        Sort sort = Sort.by(sortDirection.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, "createdAt");
+        String sortField = "createdAt";
+        Sort sort = Sort.by(Sort.Direction.ASC, sortField);
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<Wishlist> expectedWishlists = getWishlists(pageable);
         when(wishlistService.getWishlists(pageable)).thenReturn(expectedWishlists);
 
-        ResponseEntity<Page<Wishlist>> response = wishlistController.getWishlists(page, size, sortDirection);
+        ResponseEntity<Page<Wishlist>> response = wishlistController.getWishlists(page, size, sortDirection, sortField);
 
         assertEquals(expectedWishlists, response.getBody());
         verify(wishlistService, times(1)).getWishlists(pageable);
@@ -74,8 +76,7 @@ public class WishlistControllerTest {
         wishlist2.setUserId("2");
         wishlist2.setProductId("2");
         wishlists.add(wishlist2);
-        Page<Wishlist> wishlistsPage = new PageImpl<Wishlist>(wishlists, pageable, wishlists.size());
-        return wishlistsPage;
+        return new PageImpl<Wishlist>(wishlists, pageable, wishlists.size());
     }
 
     private static Wishlist getWishlist() {

@@ -2,6 +2,7 @@ package com.ecommerce.order.service.impl;
 
 import com.ecommerce.order.entity.Order;
 import com.ecommerce.order.entity.OrderItem;
+import com.ecommerce.order.entity.OrderStatus;
 import com.ecommerce.order.exception.OrderAlreadyExistException;
 import com.ecommerce.order.exception.OrderNotFoundException;
 import com.ecommerce.order.repository.OrderRepository;
@@ -40,7 +41,7 @@ class OrderServiceImplTest {
         order.setOrderId("ORD-001");
         order.setUserId("USER-001");
         order.setTotalAmount(BigDecimal.valueOf(150.00));
-        order.setStatus("PENDING");
+        order.setStatus(OrderStatus.PENDING);
         order.setOrderDate(Timestamp.valueOf(LocalDateTime.now()));
         return order;
     }
@@ -224,24 +225,6 @@ class OrderServiceImplTest {
         assertThrows(OrderNotFoundException.class, () -> orderService.deleteOrder(orderId));
         verify(orderRepository, times(1)).existsById(orderId);
         verify(orderRepository, never()).deleteById(anyString());
-    }
-
-    @Test
-    void testGetOrderItemsByUserId() {
-        String userId = "USER-001";
-        Pageable pageable = mock(Pageable.class);
-        Page<OrderItem> expectedOrderItems = createTestOrderItemPage(pageable);
-        when(orderRepository.findOrderIdByUserId(userId)).thenReturn("ORD-001");
-        when(orderItemService.getOrderItemsByOrderId("ORD-001", pageable)).thenReturn(expectedOrderItems);
-
-        Page<OrderItem> actualOrderItems = orderService.getOrderItemsByUserId(userId, pageable);
-
-        assertEquals(expectedOrderItems, actualOrderItems);
-        for (int i = 0; i < expectedOrderItems.getContent().size(); i++) {
-            assertOrderItemFields(expectedOrderItems.getContent().get(i), actualOrderItems.getContent().get(i));
-        }
-        verify(orderRepository, times(1)).findOrderIdByUserId(userId);
-        verify(orderItemService, times(1)).getOrderItemsByOrderId("ORD-001", pageable);
     }
 
     private void assertOrderFields(Order expected, Order actual) {

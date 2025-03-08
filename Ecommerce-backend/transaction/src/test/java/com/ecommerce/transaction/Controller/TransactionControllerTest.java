@@ -34,10 +34,11 @@ public class TransactionControllerTest {
         int page = 0;
         int size = 10;
         String sortDirection = "desc";
-        Sort sort = Sort.by(sortDirection.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, "transactionDate");
+        String sortField = "transactionDate";
+        Sort sort = Sort.by(Sort.Direction.DESC, sortField);
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<Transaction> transactions = transactionService.getTransactions(pageable);
-        ResponseEntity<Page<Transaction>> response = transactionController.getTransactions(page, size, sortDirection);
+        ResponseEntity<Page<Transaction>> response = transactionController.getTransactions(page, size, sortDirection, sortField);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(transactions, response.getBody());
     }
@@ -47,10 +48,11 @@ public class TransactionControllerTest {
         int page = 0;
         int size = 10;
         String sortDirection = "asc";
-        Sort sort = Sort.by(sortDirection.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, "transactionDate");
+        String sortField = "transactionDate";
+        Sort sort = Sort.by(Sort.Direction.ASC, sortField);
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<Transaction> transactions = transactionService.getTransactions(pageable);
-        ResponseEntity<Page<Transaction>> response = transactionController.getTransactions(page, size, sortDirection);
+        ResponseEntity<Page<Transaction>> response = transactionController.getTransactions(page, size, sortDirection, sortField);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(transactions, response.getBody());
     }

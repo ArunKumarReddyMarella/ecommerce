@@ -115,12 +115,16 @@ class CartControllerTest {
     void testGetCartByUserId() {
         String userId = "user1";
         Cart cart = getCart();
-        when(cartService.getCartByUserId(userId)).thenReturn(cart);
+        List<Cart> cartList = new ArrayList<>();
+        cartList.add(cart);
+        when(cartService.getCartByUserId(userId)).thenReturn(cartList);
 
-        ResponseEntity<Cart> response = cartController.getCartByUserId(userId);
+        ResponseEntity<List<Cart>> response = cartController.getCartByUserId(userId);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertCartFields(cart, Objects.requireNonNull(response.getBody()));
+        for(int i = 0; i < response.getBody().size(); i++) {
+            assertCartFields(cartList.get(i), response.getBody().get(i));
+        }
         verify(cartService, times(1)).getCartByUserId(userId);
     }
 

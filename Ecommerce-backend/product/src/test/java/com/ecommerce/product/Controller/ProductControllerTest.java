@@ -104,7 +104,8 @@ class ProductControllerTest {
         int page = 0;
         int size = 10;
         String sortDirection = "desc";
-        Sort sort = Sort.by(Sort.Direction.DESC, "retailPrice");
+        String sortField = "retailPrice";
+        Sort sort = Sort.by(Sort.Direction.DESC, sortField);
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<Product> expectedProducts = getProducts(pageable);
 
@@ -112,7 +113,7 @@ class ProductControllerTest {
         when(productService.getProducts(pageable)).thenReturn(expectedProducts);
 
         // Call the controller method
-        ResponseEntity<Page<Product>> response = productController.getProducts(page, size, sortDirection);
+        ResponseEntity<Page<Product>> response = productController.getProducts(page, size, sortDirection, sortField);
 
         // Verify the results
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -126,7 +127,8 @@ class ProductControllerTest {
         int page = 0;
         int size = 10;
         String sortDirection = "asc";
-        Sort sort = Sort.by(Sort.Direction.ASC, "retailPrice");
+        String sortField = "retailPrice";
+        Sort sort = Sort.by(Sort.Direction.ASC, sortField);
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<Product> expectedProducts = getProducts(pageable);
 
@@ -134,7 +136,7 @@ class ProductControllerTest {
         when(productService.getProducts(pageable)).thenReturn(expectedProducts);
 
         // Call the controller method
-        ResponseEntity<Page<Product>> response = productController.getProducts(page, size, sortDirection);
+        ResponseEntity<Page<Product>> response = productController.getProducts(page, size, sortDirection, sortField);
 
         // Verify the results
         assertEquals(HttpStatus.OK, response.getStatusCode());

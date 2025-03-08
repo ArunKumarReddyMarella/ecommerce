@@ -10,7 +10,7 @@ import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import spock.lang.Specification
 
-class CityServiceImplSpec extends Specification {
+class CityServiceImplTest extends Specification {
 
     private CityRepository cityRepository = Mock(CityRepository)
     private CityServiceImpl cityService = new CityServiceImpl(cityRepository: cityRepository)

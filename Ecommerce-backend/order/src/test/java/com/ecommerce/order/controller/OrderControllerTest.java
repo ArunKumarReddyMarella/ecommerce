@@ -2,6 +2,7 @@ package com.ecommerce.order.controller;
 
 import com.ecommerce.order.entity.Order;
 import com.ecommerce.order.entity.OrderItem;
+import com.ecommerce.order.entity.OrderStatus;
 import com.ecommerce.order.service.OrderItemService;
 import com.ecommerce.order.service.OrderService;
 import org.junit.jupiter.api.Test;
@@ -38,7 +39,7 @@ class OrderControllerTest {
         order.setOrderId("ORD-001");
         order.setUserId("USER-001");
         order.setTotalAmount(BigDecimal.valueOf(150.00));
-        order.setStatus("PENDING");
+        order.setStatus(OrderStatus.PENDING);
         order.setOrderDate(Timestamp.valueOf(LocalDateTime.now()));
         return order;
     }

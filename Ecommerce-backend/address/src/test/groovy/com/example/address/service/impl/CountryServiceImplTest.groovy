@@ -10,7 +10,7 @@ import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import spock.lang.Specification
 
-class CountryServiceImplSpec extends Specification {
+class CountryServiceImplTest extends Specification {
 
     private CountryRepository countryRepository = Mock(CountryRepository)
     private CountryServiceImpl countryService = new CountryServiceImpl(countryRepository: countryRepository)

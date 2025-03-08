@@ -92,11 +92,15 @@ class ProductServiceImplTest {
         product.setCrawlTimestamp(Timestamp.valueOf(LocalDateTime.now()));
         product.setProductUrl("https://example.com/product1");
         product.setProductName("Product 1");
-        product.setCategories("Category 1");
+        product.setCategories("Pens & Stationery , Office Supplies , Diaries , Tiedribbons Diaries");
         product.setPid("P001");
         product.setRetailPrice(BigDecimal.TEN);
         product.setDiscountedPrice(BigDecimal.ONE);
-        product.setImageUrls("https://example.com/product1.jpg");
+        product.setImageUrls("[\"http://img6a.flixcart.com/image/diary-notebook/r/q/u/tiedribbons-6-original-imaefmsy5afbpvmg.jpeg\"]");
+//        product.setImageUrls("[\"http://img6a.flixcart.com/image/diary-notebook/r/q/u/tiedribbons-6-original-imaefmsy5afbpvmg.jpeg," +
+//                "http://img6a.flixcart.com/image/diary-notebook/p/6/z/tiedribbons-3-original-imae8yjhhgyrrkuz.jpeg," +
+//                "http://img5a.flixcart.com/image/diary-notebook/p/6/z/tiedribbons-3-original-imae8yjhfpzd9gb7.jpeg," +
+//                "http://img6a.flixcart.com/image/diary-notebook/p/6/z/tiedribbons-3-original-imae8yjhbhcyv4hz.jpeg\"]");
         product.setFkAdvantageProduct(false);
         product.setProductDescription("Description 1");
         product.setProductRating("4.5");

@@ -5,6 +5,7 @@ import com.example.address.entity.City
 import com.example.address.entity.Country
 import com.example.address.exception.CountryNotFoundException
 import com.example.address.service.CountryService
+import com.example.address.service.impl.CountryServiceImpl
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
@@ -14,10 +15,18 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import spock.lang.Specification
 
-class CountryControllerSpec extends Specification {
+class CountryControllerTest extends Specification {
 
-    private CountryService countryService = Mock(CountryService)
-    private CountryController countryController = new CountryController(countryService)
+//    CountryService countryService = Mock(CountryService)
+//    CountryController countryController = new CountryController(countryService)
+
+    CountryController countryController
+    CountryService countryService = Mock(CountryServiceImpl)
+
+    def setup() {
+        countryController = new CountryController(countryService: countryService)
+    }
+
 
     def "Get all countries"() {
         given:
@@ -51,15 +60,28 @@ class CountryControllerSpec extends Specification {
         response.body == country
     }
 
+//    def "Get country by ID not found"() {
+//        given:
+//        def countryId = "1234"
+//
+//        when:
+//        countryService.getCountryById(countryId) >> throw new CountryNotFoundException("Country not found with ID: $countryId")
+//        ResponseEntity<Country> response = countryController.getCountryById(countryId)
+//
+//        then:
+//        1 * countryService.getCountryById(countryId)
+//        response.statusCode == HttpStatus.NOT_FOUND
+//    }
     def "Get country by ID not found"() {
         given:
-        String countryId = "1234"
+        def countryId = "1234"
 
         when:
+        countryService.getCountryById(countryId) >> {throw new CountryNotFoundException("Country not found with ID: $countryId")}
         ResponseEntity<Country> response = countryController.getCountryById(countryId)
 
         then:
-        1 * countryService.getCountryById(countryId) >> { throw new CountryNotFoundException("Country not found with ID: $countryId") }
+        1 * countryService.getCountryById(countryId)
         response.statusCode == HttpStatus.NOT_FOUND
     }
 

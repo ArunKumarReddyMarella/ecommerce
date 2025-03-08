@@ -10,7 +10,7 @@ import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import spock.lang.Specification
 
-class AddressServiceImplSpec extends Specification {
+class AddressServiceImpTest extends Specification {
 
     private AddressRepository addressRepository = Mock(AddressRepository)
     private AddressServiceImpl addressService = new AddressServiceImpl(addressRepository: addressRepository)
